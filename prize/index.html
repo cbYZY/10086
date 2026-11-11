@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/jpeg" href="../ext/1858374084.cdn.123clouddisk.com/38273346#" />
+<title>班级颁奖 · 班级 Tools</title>
+<style>
+/* SECTION: font-face */
+@font-face {
+  font-family: 'SmileySans';
+  src: url('../ext/1858374084.cdn.123clouddisk.com/38138536#') format('truetype');
+  font-display: swap;
+  font-weight: 400 900;
+  }
+@font-face {
+  font-family: 'YeZiXingKai';
+  src: url('../ext/1858374084.cdn.123clouddisk.com/38273347#') format('truetype');
+  font-display: swap;
+  font-weight: 400 900;
+}
+@font-face {
+  font-family: 'BaiGe';
+  src: url('../ext/1858374084.cdn.123clouddisk.com/38273347#') format('truetype');
+  font-display: swap;
+  font-weight: 400 900;
+}
+
+/* SECTION: base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #f6f4ef;
+  --ink: #1c2430;
+  --ink-soft: #5c6673;
+  --gold: #b7892f;
+  --gold-soft: rgba(183, 137, 47, 0.14);
+  --line: #e8e3d8;
+}
+html, body { min-height: 100%; }
+body {
+  font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+}
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 500;
+  background: linear-gradient(90deg, transparent, #d4a94e 22%, #f0d795 50%, #d4a94e 78%, transparent);
+}
+.hidden { display: none !important; }
+
+/* SECTION: topbar */
+.view-topbar {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 22px 3.2vw 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 10px 24px; border-radius: 999px; border: 1px solid transparent;
+  font-size: 15px; letter-spacing: 0.06em; cursor: pointer; text-decoration: none;
+  font-family: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary {
+  background: linear-gradient(135deg, #232d3c, #1c2430 60%, #28344a);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(28, 36, 48, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.btn-primary:hover { transform: translateY(-1px); }
+.btn-ghost { background: transparent; border-color: var(--line); color: var(--ink-soft); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+/* SECTION: header */
+.page-header {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 30px 3.2vw 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.title-block h1 {
+  font-family: 'SmileySans', "Noto Serif SC", serif;
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+  text-align: center;
+}
+.title-rule {
+  width: 76px; height: 3px; margin: 12px auto 8px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.subtitle { color: var(--ink-soft); font-size: 15px; letter-spacing: 0.08em; text-align: center; }
+
+/* SECTION: setting panel */
+main {
+  flex: 1; width: 100%; max-width: 1280px;
+  margin: 0 auto; padding: 20px 3.2vw 40px;
+}
+.panel {
+  width: 100%; max-width: 640px;
+  margin: 10px auto 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 10px 30px rgba(20, 24, 32, 0.06);
+}
+.field { margin-top: 22px; }
+.field:first-child { margin-top: 0; }
+.field label {
+  display: block;
+  font-size: 15px; font-weight: 600; letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+.field label small { color: var(--ink-soft); font-weight: 400; font-size: 12.5px; margin-left: 8px; }
+.field input {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--ink);
+  background: #fdfcfa;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(183, 137, 47, 0.15);
+}
+.actions {
+  display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px;
+}
+
+/* SECTION: award (fullscreen) */
+#award-view {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: #0d1117;
+  background-image: url('../ext/1858374084.cdn.123clouddisk.com/38379272#');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.award-lines {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 42%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.1em;
+  font-family: 'BaiGe', "PingFang SC", serif;
+  color: #ffffff;
+  text-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.7),
+    0 0 28px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+.award-duo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12em;
+}
+.line {
+  white-space: nowrap;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.line-1 { /* 班级的微光 */
+  font-size: clamp(44px, 6vw, 96px);
+}
+.line-2 { /* 榜样的力量 —— 右移3字，中间2字与上行对齐 (3+2+3) */
+  margin-left: calc(3em + 3 * 0.06em);
+  font-size: clamp(44px, 6vw, 96px);
+}
+.line-3 { /* xx班颁奖仪式 —— 居中 */
+  margin-top: 0.7em;
+  font-size: clamp(34px, 4.4vw, 72px);
+}
+.line-4 { /* 仪式名 —— 居中 */
+  font-size: clamp(34px, 4.4vw, 72px);
+}
+.exit-btn {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 10;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(20, 24, 32, 0.55);
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  font-family: inherit;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.exit-btn:hover { background: rgba(183, 137, 47, 0.7); transform: scale(1.06); }
+
+.page-footer {
+  text-align: center;
+  padding: 14px 20px 28px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 640px) {
+  main { padding: 20px 16px 30px; }
+  .panel { padding: 22px; }
+  .line-1, .line-2 { font-size: 38px; }
+  .line-3, .line-4 { font-size: 30px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SECTION: setting view (default) -->
+<div id="setting-view">
+  <div class="view-topbar">
+    <a class="btn btn-ghost" href="../index.html">← 班级主页</a>
+    <span></span>
+  </div>
+
+  <header class="page-header">
+    <div class="title-block">
+      <h1>班级颁奖</h1>
+      <div class="title-rule"></div>
+      <p class="subtitle">班级的微光 · 榜样的力量 —— 全屏合影背景字</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="field">
+        <label>颁奖名称 <small>（显示在第四行，可留空）</small></label>
+        <input type="text" id="award-name" maxlength="30" value="" placeholder="例如：期中表彰大会" />
+      </div>
+      <div class="field">
+        <label>班级名 <small>（长期记忆，自动保存；显示为「xx班颁奖仪式」）</small></label>
+        <input type="text" id="class-name" maxlength="10" placeholder="例如：717" />
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="start-btn" type="button">开始颁奖</button>
+        <button class="btn btn-ghost" id="reset-btn" type="button">重置</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <p>班级颁奖 · 全屏合影背景字 · 设置仅保存在当前浏览器本地</p>
+  </footer>
+</div>
+
+<!-- SECTION: award view (fullscreen) -->
+<div id="award-view" class="hidden">
+  <button class="exit-btn" id="exit-btn" type="button" aria-label="退出颁奖">✕</button>
+  <div class="award-lines">
+    <div class="award-duo">
+      <div class="line line-1">班级的微光</div>
+      <div class="line line-2">榜样的力量</div>
+    </div>
+    <div class="line line-3" id="line-class">717班颁奖仪式</div>
+    <div class="line line-4" id="line-award">0</div>
+  </div>
+</div>
+
+<script>
+var LS_CLASS = 'banjiang_class_name';
+var LS_AWARD = 'banjiang_award_name';
+
+var awardNameInput = document.getElementById('award-name');
+var classNameInput = document.getElementById('class-name');
+var settingView = document.getElementById('setting-view');
+var awardView = document.getElementById('award-view');
+var lineClass = document.getElementById('line-class');
+var lineAward = document.getElementById('line-award');
+
+// 加载长期记忆：班级名 + 颁奖名（填过就自动回填）
+function loadSettings() {
+  try {
+    var c = localStorage.getItem(LS_CLASS);
+    if (c !== null && c !== undefined) { classNameInput.value = c; }
+    var a = localStorage.getItem(LS_AWARD);
+    if (a !== null && a !== undefined) { awardNameInput.value = a; }
+  } catch (e) { /* 静默降级 */ }
+}
+function saveSettings() {
+  try {
+    localStorage.setItem(LS_CLASS, classNameInput.value.trim());
+    localStorage.setItem(LS_AWARD, awardNameInput.value.trim());
+  } catch (e) { /* 静默降级 */ }
+}
+
+function enterFullscreen() {
+  var el = document.documentElement;
+  if (el.requestFullscreen) { el.requestFullscreen().catch(function(){}); }
+  else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); }
+}
+function exitFullscreenSafe() {
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    if (document.exitFullscreen) { document.exitFullscreen().catch(function(){}); }
+    else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+  }
+}
+
+function openAward() {
+  var cls = classNameInput.value.trim();
+  var award = awardNameInput.value.trim();
+  lineClass.textContent = cls ? cls + '班颁奖仪式' : '班颁奖仪式';
+  lineAward.textContent = award; // 空则不显示
+  saveSettings();
+  settingView.classList.add('hidden');
+  awardView.classList.remove('hidden');
+  document.documentElement.style.overflow = 'hidden';
+  enterFullscreen();
+}
+
+function exitAward() {
+  exitFullscreenSafe();
+  awardView.classList.add('hidden');
+  settingView.classList.remove('hidden');
+  document.documentElement.style.overflow = '';
+}
+
+document.getElementById('start-btn').addEventListener('click', openAward);
+document.getElementById('exit-btn').addEventListener('click', exitAward);
+document.getElementById('reset-btn').addEventListener('click', function () {
+  awardNameInput.value = '';
+  classNameInput.value = '';
+  saveSettings();
+});
+
+// 监听全屏变化：用户按 ESC 等方式退出全屏时，同步隐藏颁奖界面
+function onFullscreenChange() {
+  var isFull = document.fullscreenElement || document.webkitFullscreenElement;
+  if (!isFull && !awardView.classList.contains('hidden')) {
+    awardView.classList.add('hidden');
+    settingView.classList.remove('hidden');
+    document.documentElement.style.overflow = '';
+  }
+}
+document.addEventListener('fullscreenchange', onFullscreenChange);
+document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+
+loadSettings();
+</script>
+<script type="module" src="../ext/static.cloudflareinsights.com/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"14c5f7de53ca40a9aaaf4550cdf47b2e","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

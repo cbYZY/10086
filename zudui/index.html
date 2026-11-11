@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/jpeg" href="../ext/1858374084.cdn.123clouddisk.com/38273346#" />
+<title>小组分队 · 班级 Tools</title>
+<style>
+/* SECTION: font-face */
+@font-face {
+  font-family: 'SmileySans';
+  src: url('../ext/1858374084.cdn.123clouddisk.com/38138536#') format('truetype');
+  font-display: swap;
+  font-weight: 400 900;
+}
+
+/* SECTION: base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #f6f4ef;
+  --ink: #1c2430;
+  --ink-soft: #5c6673;
+  --gold: #b7892f;
+  --gold-deep: #8f6a22;
+  --gold-soft: rgba(183, 137, 47, 0.14);
+  --line: #e8e3d8;
+}
+html, body { min-height: 100%; }
+body {
+  font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 500;
+  background: linear-gradient(90deg, transparent, #d4a94e 22%, #f0d795 50%, #d4a94e 78%, transparent);
+}
+.hidden { display: none !important; }
+
+/* SECTION: topbar */
+.view-topbar {
+  max-width: 1720px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 22px 3.2vw 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 10px 24px; border-radius: 999px; border: 1px solid transparent;
+  font-size: 15px; letter-spacing: 0.06em; cursor: pointer; text-decoration: none;
+  font-family: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary {
+  background: linear-gradient(135deg, #232d3c, #1c2430 60%, #28344a);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(28, 36, 48, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.btn-primary:hover { transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.btn-ghost { background: transparent; border-color: var(--line); color: var(--ink-soft); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+/* SECTION: header */
+.page-header {
+  max-width: 1720px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 26px 3.2vw 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.title-block h1 {
+  font-family: 'SmileySans', "Noto Serif SC", serif;
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+  text-align: center;
+}
+.title-rule {
+  width: 76px; height: 3px; margin: 10px auto 6px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.subtitle { color: var(--ink-soft); font-size: 15px; letter-spacing: 0.08em; text-align: center; }
+
+/* SECTION: main */
+main {
+  flex: 1; width: 100%; max-width: 1720px;
+  margin: 0 auto; padding: 18px 3.2vw 40px;
+}
+
+/* 看板 */
+.dash {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.dash-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 10px;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(20, 24, 32, 0.05);
+}
+.dash-num {
+  font-family: 'SmileySans', "Noto Serif SC", serif;
+  font-size: clamp(30px, 3.6vw, 44px);
+  font-weight: 700;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #d4a94e, #b7892f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.dash-label { color: var(--ink-soft); font-size: 14px; letter-spacing: 0.12em; margin-top: 6px; }
+
+/* 规则提示 */
+.rule-bar {
+  background: var(--gold-soft);
+  border-left: 4px solid var(--gold);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--gold-deep);
+  letter-spacing: 0.03em;
+  margin-bottom: 18px;
+  line-height: 1.7;
+}
+
+/* 操作区 */
+.action-panel {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(20, 24, 32, 0.06);
+  text-align: center;
+}
+.action-panel .btn-pick {
+  font-size: 18px;
+  padding: 14px 44px;
+  letter-spacing: 0.12em;
+}
+.group-overview {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  margin-top: 18px;
+}
+.group-chip {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fdfcfa;
+  font-size: 14px;
+}
+.group-chip b { font-weight: 700; }
+.group-chip small { color: var(--ink-soft); font-size: 12.5px; }
+
+/* 结果区 */
+.result-head {
+  text-align: center;
+  margin: 30px 0 16px;
+}
+.result-head h2 {
+  font-size: clamp(22px, 2.4vw, 30px);
+  letter-spacing: 0.14em;
+  font-weight: 700;
+}
+.result-head .result-rule {
+  width: 60px; height: 3px; margin: 10px auto 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.teams {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.team-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 30px 26px;
+  box-shadow: 0 10px 26px rgba(20, 24, 32, 0.07);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: teamIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(var(--i) * 0.12s);
+}
+@keyframes teamIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+.team-no {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 19px;
+  letter-spacing: 0.24em;
+  color: var(--gold-deep);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.team-side { text-align: center; }
+.team-side .g-name {
+  font-size: clamp(30px, 2.8vw, 46px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+}
+.team-side .g-count {
+  margin-top: 8px;
+  font-size: 17px;
+  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+}
+.team-link {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d4a94e, #b7892f);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; font-weight: 700;
+  box-shadow: 0 6px 14px rgba(183, 137, 47, 0.4);
+}
+
+/* 滚动动效 */
+.rolling-box {
+  margin-top: 20px;
+  text-align: center;
+}
+.rolling-text {
+  font-size: clamp(24px, 3vw, 38px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--gold-deep);
+  min-height: 1.4em;
+}
+.rolling-sub { color: var(--ink-soft); font-size: 14px; margin-top: 8px; letter-spacing: 0.1em; }
+
+.warn-box {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(193, 74, 74, 0.08);
+  border: 1px solid rgba(193, 74, 74, 0.3);
+  color: #b34a4a;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* 历史 */
+.history-panel {
+  margin-top: 34px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(20, 24, 32, 0.05);
+}
+.history-panel h3 {
+  font-size: 17px; letter-spacing: 0.12em; font-weight: 700;
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.history-panel h3::after {
+  content: ""; flex: 1; height: 1px; background: var(--line);
+}
+.hist-empty { color: var(--ink-soft); font-size: 14px; text-align: center; padding: 14px 0; }
+.hist-item {
+  padding: 12px 4px;
+  border-bottom: 1px dashed var(--line);
+  font-size: 14px;
+}
+.hist-item:last-child { border-bottom: none; }
+.hist-top {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.hist-badge {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  background: var(--gold-soft);
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+.hist-time { color: var(--ink-soft); font-size: 13px; }
+.hist-teams { color: var(--ink); line-height: 1.8; }
+.hist-teams .ht-team { white-space: nowrap; }
+.hist-teams .ht-sep { color: var(--gold); margin: 0 6px; font-weight: 700; }
+
+.page-footer {
+  text-align: center;
+  padding: 10px 20px 26px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+/* SECTION: admin modal（名单管理） */
+.modal-mask {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(20, 24, 32, 0.45);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal {
+  background: #fff;
+  border-radius: 18px;
+  width: 100%; max-width: 560px;
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: 26px;
+  box-shadow: 0 24px 60px rgba(20, 24, 32, 0.3);
+}
+.modal h3 { font-size: 19px; letter-spacing: 0.1em; margin-bottom: 6px; }
+.modal .modal-tip { color: var(--ink-soft); font-size: 13px; line-height: 1.7; margin-bottom: 12px; }
+.modal textarea {
+  width: 100%;
+  min-height: 220px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.7;
+  resize: vertical;
+  background: #fdfcfa;
+  color: var(--ink);
+}
+.modal textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(183,137,47,0.15); }
+.modal-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.modal-status { margin-top: 12px; font-size: 13.5px; min-height: 1.4em; }
+.modal-status.ok { color: #2e7d4f; }
+.modal-status.err { color: #b34a4a; }
+
+@media (max-width: 760px) {
+  .teams { grid-template-columns: 1fr; }
+  .dash { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .dash-card { padding: 14px 4px; }
+}
+</style>
+</head>
+<body>
+
+<div class="view-topbar">
+  <a class="btn btn-ghost" href="../index.html">← 班级主页</a>
+  <button class="btn btn-ghost" id="open-admin-btn" type="button">名单管理</button>
+</div>
+
+<header class="page-header">
+  <div class="title-block">
+    <h1>小组分队</h1>
+    <div class="title-rule"></div>
+    <p class="subtitle">活动抽签 · 两组一队 · 同人数优先配对 · 队序随机</p>
+  </div>
+</header>
+
+<main>
+  <!-- 看板 -->
+  <section class="dash">
+    <div class="dash-card">
+      <div class="dash-num" id="dash-groups">0</div>
+      <div class="dash-label">总组数</div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-num" id="dash-people">0</div>
+      <div class="dash-label">总人数</div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-num" id="dash-teams">0</div>
+      <div class="dash-label">可分队数</div>
+    </div>
+  </section>
+
+  <div class="rule-bar">
+    分队规则：两个小组配成一队；优先让<strong>人数相同</strong>的组配对；<strong>6 人组不与 8 人组配对</strong>；每队顺序随机抽签生成，可用于辩论赛、对抗赛等活动出场顺序。
+  </div>
+
+  <section class="action-panel">
+    <button class="btn btn-primary btn-pick" id="draw-btn" type="button">抽签分队</button>
+    <div class="group-overview" id="group-overview"></div>
+    <div class="rolling-box hidden" id="rolling-box">
+      <div class="rolling-text" id="rolling-text"></div>
+      <div class="rolling-sub">正在洗牌分队…</div>
+    </div>
+    <div class="warn-box hidden" id="warn-box"></div>
+  </section>
+
+  <section id="result-section" class="hidden">
+    <div class="result-head">
+      <h2>分队结果</h2>
+      <div class="result-rule"></div>
+    </div>
+    <div class="teams" id="teams"></div>
+  </section>
+
+  <section class="history-panel">
+    <h3>分队历史 · 本地留存最近 10 次</h3>
+    <div id="history-list"><div class="hist-empty">暂无分队记录</div></div>
+  </section>
+</main>
+
+<footer class="page-footer">
+  <p>小组分队 · 名单与「打卡记录 / 随机点名」共用 · 纯本地运行</p>
+</footer>
+
+<!-- 名单管理弹层 -->
+<div class="modal-mask hidden" id="admin-mask">
+  <div class="modal">
+    <h3>名单管理</h3>
+    <p class="modal-tip">
+      与「打卡记录 / 随机点名」共用同一份名单。<br />
+      一行一个名字；以 <b>#</b> 结尾的行是小组标题（如「第一组#」），其下的名字属于该组。
+    </p>
+    <textarea id="name-input" placeholder="例如：&#10;第一组#&#10;张伟&#10;李娜&#10;第二组#&#10;王昌龄&#10;……"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="save-names-btn" type="button">保存名单</button>
+      <button class="btn btn-ghost" id="load-txt-btn" type="button">读取 name.txt</button>
+      <button class="btn btn-ghost" id="close-admin-btn" type="button">关闭</button>
+    </div>
+    <div class="modal-status" id="admin-status"></div>
+  </div>
+</div>
+
+<script>
+// SECTION: constants
+var LS_NAMES_GLOBAL = 'zzx_mp_names_global';
+var LS_HISTORY = 'zzx_zudui_history_v1';
+var NAME_TXT_URL = '../daka/name.txt';
+var UNGROUPED_NAME = '全体';
+var ROLL_MS = 500;
+var ROLL_TICK = 50;
+var HISTORY_MAX = 10;
+
+// SECTION: state
+var groups = [];   // [{name, members:[]}]
+var rolling = false;
+
+var dashGroups = document.getElementById('dash-groups');
+var dashPeople = document.getElementById('dash-people');
+var dashTeams = document.getElementById('dash-teams');
+var groupOverview = document.getElementById('group-overview');
+var drawBtn = document.getElementById('draw-btn');
+var rollingBox = document.getElementById('rolling-box');
+var rollingText = document.getElementById('rolling-text');
+var warnBox = document.getElementById('warn-box');
+var resultSection = document.getElementById('result-section');
+var teamsEl = document.getElementById('teams');
+var historyList = document.getElementById('history-list');
+var adminMask = document.getElementById('admin-mask');
+var nameInput = document.getElementById('name-input');
+var adminStatus = document.getElementById('admin-status');
+
+// SECTION: utils
+function pad2(x) { return String(x).padStart(2, '0'); }
+function fmtDateTime(ts) {
+  var d = new Date(ts);
+  return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日 ' +
+    pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+}
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+  });
+}
+
+// SECTION: names
+function loadGlobalNames() {
+  try {
+    var raw = localStorage.getItem(LS_NAMES_GLOBAL);
+    if (raw) {
+      var arr = JSON.parse(raw);
+      if (Array.isArray(arr)) {
+        return arr.filter(function (n) { return typeof n === 'string' && n.trim() !== ''; });
+      }
+    }
+  } catch (e) { /* 静默降级 */ }
+  return [];
+}
+function saveGlobalNames(list) {
+  try { localStorage.setItem(LS_NAMES_GLOBAL, JSON.stringify(list)); } catch (e) { /* 静默降级 */ }
+}
+function parseGroups(list) {
+  var gs = [];
+  var cur = null;
+  var headless = [];
+  list.forEach(function (line) {
+    if (/#$/.test(line)) {
+      var gname = line.replace(/#+$/, '').trim();
+      cur = { name: gname || UNGROUPED_NAME, members: [] };
+      gs.push(cur);
+    } else if (cur) {
+      cur.members.push(line);
+    } else {
+      headless.push(line);
+    }
+  });
+  if (headless.length > 0) { gs.unshift({ name: UNGROUPED_NAME, members: headless }); }
+  gs = gs.filter(function (g) { return g.members.length > 0; });
+  if (gs.length === 0 && list.length > 0) { gs.push({ name: UNGROUPED_NAME, members: list.slice() }); }
+  return gs;
+}
+function normalizeTxt(text) {
+  var seen = {};
+  var out = [];
+  text.split(/\r?\n/).forEach(function (line) {
+    var n = line.trim();
+    var key = /#$/.test(n) ? n + '::group' : n;
+    if (n && !seen[key]) { seen[key] = true; out.push(n); }
+  });
+  return out;
+}
+function loadNames() {
+  groups = parseGroups(loadGlobalNames());
+}
+
+// SECTION: pairing algorithm
+// 约束：6人组不与8人组配对；优先人数相同；队序随机
+function compatible(a, b) {
+  var ca = a.count, cb = b.count;
+  if ((ca === 6 && cb === 8) || (ca === 8 && cb === 6)) { return false; }
+  return true;
+}
+function pairTeams(gs) {
+  var n = gs.length;
+  if (n < 2 || n % 2 !== 0) { return null; }
+  var items = gs.map(function (g) { return { name: g.name, count: g.members.length }; });
+  var order = shuffle(items.map(function (_, i) { return i; }));
+  var used = new Array(n).fill(false);
+  var pairs = [];
+
+  function dfs() {
+    var i = -1;
+    for (var k = 0; k < order.length; k++) {
+      if (!used[order[k]]) { i = order[k]; break; }
+    }
+    if (i === -1) { return true; }
+    used[i] = true;
+    var cands = [];
+    for (var m = 0; m < order.length; m++) {
+      var j = order[m];
+      if (!used[j] && j !== i && compatible(items[i], items[j])) { cands.push(j); }
+    }
+    // 人数差小的优先（同人数优先），同档随机
+    cands.sort(function (a, b) {
+      var da = Math.abs(items[a].count - items[i].count) + Math.random() * 0.9;
+      var db = Math.abs(items[b].count - items[i].count) + Math.random() * 0.9;
+      return da - db;
+    });
+    for (var c = 0; c < cands.length; c++) {
+      var jj = cands[c];
+      used[jj] = true;
+      pairs.push([i, jj]);
+      if (dfs()) { return true; }
+      pairs.pop();
+      used[jj] = false;
+    }
+    used[i] = false;
+    return false;
+  }
+
+  if (!dfs()) { return 'noconfig'; }
+  // 队序随机洗牌
+  return shuffle(pairs).map(function (p) { return [items[p[0]], items[p[1]]]; });
+}
+
+// SECTION: history
+function loadHistory() {
+  try {
+    var arr = JSON.parse(localStorage.getItem(LS_HISTORY) || '[]');
+    if (Array.isArray(arr)) { return arr.slice(0, HISTORY_MAX); }
+  } catch (e) { /* 静默降级 */ }
+  return [];
+}
+function pushHistory(rec) {
+  var arr = loadHistory();
+  arr.unshift(rec);
+  arr = arr.slice(0, HISTORY_MAX);
+  try { localStorage.setItem(LS_HISTORY, JSON.stringify(arr)); } catch (e) { /* 静默降级 */ }
+}
+
+// SECTION: render
+function render() {
+  var gCount = groups.length;
+  var pCount = 0;
+  groups.forEach(function (g) { pCount += g.members.length; });
+  dashGroups.textContent = gCount;
+  dashPeople.textContent = pCount;
+  dashTeams.textContent = (gCount >= 2 && gCount % 2 === 0) ? (gCount / 2) : 0;
+
+  groupOverview.innerHTML = '';
+  groups.forEach(function (g) {
+    var chip = document.createElement('span');
+    chip.className = 'group-chip';
+    chip.innerHTML = '<b>' + esc(g.name) + '</b><small>' + g.members.length + ' 人</small>';
+    groupOverview.appendChild(chip);
+  });
+
+  drawBtn.disabled = gCount < 2;
+  renderHistory();
+}
+
+function renderHistory() {
+  var arr = loadHistory();
+  if (arr.length === 0) {
+    historyList.innerHTML = '<div class="hist-empty">暂无分队记录</div>';
+    return;
+  }
+  historyList.innerHTML = '';
+  arr.forEach(function (rec) {
+    var item = document.createElement('div');
+    item.className = 'hist-item';
+    var teamsHtml = rec.teams.map(function (t, idx) {
+      var s = '<span class="ht-team">第' + (idx + 1) + '队 ' +
+        esc(t[0].name) + '(' + t[0].count + '人) <span class="ht-sep">＋</span> ' +
+        esc(t[1].name) + '(' + t[1].count + '人)</span>';
+      return s;
+    }).join('<br />');
+    item.innerHTML =
+      '<div class="hist-top">' +
+        '<span class="hist-badge">' + rec.teams.length + ' 队</span>' +
+        '<span class="hist-time">' + esc(rec.time) + '</span>' +
+      '</div>' +
+      '<div class="hist-teams">' + teamsHtml + '</div>';
+    historyList.appendChild(item);
+  });
+}
+
+function showWarn(msg) {
+  warnBox.textContent = msg;
+  warnBox.classList.remove('hidden');
+}
+function hideWarn() { warnBox.classList.add('hidden'); }
+
+function renderTeams(teams) {
+  teamsEl.innerHTML = '';
+  teams.forEach(function (t, i) {
+    var card = document.createElement('div');
+    card.className = 'team-card';
+    card.style.setProperty('--i', i);
+    card.innerHTML =
+      '<div class="team-no">第 ' + (i + 1) + ' 队</div>' +
+      '<div class="team-side"><div class="g-name">' + esc(t[0].name) + '</div><div class="g-count">' + t[0].count + ' 人</div></div>' +
+      '<div class="team-link">＋</div>' +
+      '<div class="team-side"><div class="g-name">' + esc(t[1].name) + '</div><div class="g-count">' + t[1].count + ' 人</div></div>';
+    teamsEl.appendChild(card);
+  });
+  resultSection.classList.remove('hidden');
+}
+
+// SECTION: draw
+function draw() {
+  if (rolling) { return; }
+  hideWarn();
+  if (groups.length < 2) {
+    showWarn('名单中没有可用的小组，请先在「名单管理」中设置分组名单（组名以 # 结尾）。');
+    return;
+  }
+  if (groups.length % 2 !== 0) {
+    showWarn('当前共 ' + groups.length + ' 个小组，数量为奇数，无法两两配队。请调整名单使小组数为偶数。');
+    return;
+  }
+
+  rolling = true;
+  drawBtn.disabled = true;
+  resultSection.classList.add('hidden');
+  rollingBox.classList.remove('hidden');
+
+  // 0.5s 滚动动效：快速随机显示配对
+  var timer = setInterval(function () {
+    var a = groups[Math.floor(Math.random() * groups.length)];
+    var b = groups[Math.floor(Math.random() * groups.length)];
+    rollingText.textContent = a.name + ' ＋ ' + (b.name === a.name ? '…' : b.name);
+  }, ROLL_TICK);
+
+  setTimeout(function () {
+    clearInterval(timer);
+    rollingBox.classList.add('hidden');
+    var result = pairTeams(groups);
+    rolling = false;
+    drawBtn.disabled = false;
+
+    if (result === 'noconfig' || result === null) {
+      showWarn(result === 'noconfig'
+        ? '当前人数分布无法在满足「6人组不与8人组配对」的前提下完成配队，请调整小组人数后再试。'
+        : '小组数量不足或为奇数，无法分队。');
+      return;
+    }
+
+    renderTeams(result);
+    pushHistory({ time: fmtDateTime(Date.now()), teams: result });
+    renderHistory();
+  }, ROLL_MS);
+}
+
+// SECTION: admin modal
+function openAdmin() {
+  nameInput.value = loadGlobalNames().join('\n');
+  adminStatus.textContent = '';
+  adminMask.classList.remove('hidden');
+}
+function closeAdmin() { adminMask.classList.add('hidden'); }
+function setAdminStatus(msg, ok) {
+  adminStatus.textContent = msg;
+  adminStatus.className = 'modal-status ' + (ok ? 'ok' : 'err');
+}
+
+document.getElementById('open-admin-btn').addEventListener('click', openAdmin);
+document.getElementById('close-admin-btn').addEventListener('click', closeAdmin);
+adminMask.addEventListener('click', function (e) { if (e.target === adminMask) { closeAdmin(); } });
+
+document.getElementById('save-names-btn').addEventListener('click', function () {
+  var list = normalizeTxt(nameInput.value);
+  if (list.length === 0) { setAdminStatus('名单为空，请先粘贴内容。', false); return; }
+  saveGlobalNames(list);
+  loadNames();
+  render();
+  var gc = groups.length;
+  var pc = 0; groups.forEach(function (g) { pc += g.members.length; });
+  setAdminStatus('保存成功：共 ' + pc + ' 人、' + gc + ' 个小组。', true);
+});
+
+document.getElementById('load-txt-btn').addEventListener('click', function () {
+  fetch(NAME_TXT_URL)
+    .then(function (r) { if (!r.ok) { throw new Error('HTTP ' + r.status); } return r.text(); })
+    .then(function (text) {
+      var list = normalizeTxt(text);
+      if (list.length === 0) { throw new Error('empty'); }
+      nameInput.value = list.join('\n');
+      setAdminStatus('已读取 name.txt，共 ' + list.length + ' 行，点击「保存名单」生效。', true);
+    })
+    .catch(function () { setAdminStatus('读取 name.txt 失败（文件不存在或无法访问），可手动粘贴名单。', false); });
+});
+
+drawBtn.addEventListener('click', draw);
+
+// SECTION: init
+loadNames();
+if (groups.length === 0) {
+  // 首次使用：尝试自动读取 name.txt
+  fetch(NAME_TXT_URL)
+    .then(function (r) { if (!r.ok) { throw new Error('HTTP ' + r.status); } return r.text(); })
+    .then(function (text) {
+      var list = normalizeTxt(text);
+      if (list.length > 0) {
+        saveGlobalNames(list);
+        loadNames();
+        render();
+      } else { render(); }
+    })
+    .catch(function () { render(); });
+} else {
+  render();
+}
+</script>
+<script type="module" src="../ext/static.cloudflareinsights.com/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"14c5f7de53ca40a9aaaf4550cdf47b2e","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

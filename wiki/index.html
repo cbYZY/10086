@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- SECTION: site-icon -->
+<link rel="icon" type="image/jpeg" href="../ext/1858374084.cdn.123clouddisk.com/38273346#" />
+<title>班级 Wiki · 班级 Tools</title>
+<style>
+/* SECTION: font-face 得意黑（Smiley Sans） */
+@font-face {
+  font-family: 'SmileySans';
+  src: url('../ext/1858374084.cdn.123clouddisk.com/38138536#') format('truetype');
+  font-display: swap;
+  font-weight: 400 900;
+}
+
+/* SECTION: base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #f6f4ef;
+  --ink: #1c2430;
+  --ink-soft: #5c6673;
+  --gold: #b7892f;
+  --gold-soft: rgba(183, 137, 47, 0.14);
+  --card: #ffffff;
+  --line: #e8e3d8;
+  --done-a: #1f4d3a;
+}
+html, body { min-height: 100%; }
+body {
+  font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Source Han Sans SC", sans-serif;
+  background:
+    radial-gradient(1100px 520px at 85% -10%, rgba(183, 137, 47, 0.09), transparent 60%),
+    radial-gradient(900px 480px at -10% 0%, rgba(28, 36, 48, 0.06), transparent 55%),
+    var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+}
+body::before { /* 顶部金线 */
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 500;
+  background: linear-gradient(90deg, transparent, #d4a94e 22%, #f0d795 50%, #d4a94e 78%, transparent);
+}
+.hidden { display: none !important; }
+
+/* SECTION: topbar */
+.view-topbar {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 22px 3.2vw 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  transition: transform 0.15s ease, border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.btn:active { transform: scale(0.96); }
+.btn-ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink-soft);
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+/* SECTION: header */
+.page-header {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 26px 3.2vw 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.title-block { text-align: center; }
+.title-block h1 {
+  font-family: 'SmileySans', "Noto Serif SC", "Source Han Serif SC", serif;
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+}
+.title-rule {
+  width: 76px;
+  height: 3px;
+  margin: 12px auto 8px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.subtitle { color: var(--ink-soft); font-size: 15px; letter-spacing: 0.08em; }
+
+/* SECTION: main */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 3.2vw 40px;
+}
+
+/* SECTION: list */
+.article-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+.article-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 24px 22px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(20, 24, 32, 0.04), 0 10px 26px rgba(20, 24, 32, 0.05);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.article-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(183, 137, 47, 0.5);
+  box-shadow: 0 16px 34px rgba(20, 24, 32, 0.12);
+}
+.article-card .art-theme {
+  font-size: 13px;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
+}
+.article-card h2 {
+  font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.article-card .art-tag {
+  align-self: flex-start;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--gold);
+  border: 1px solid rgba(183, 137, 47, 0.3);
+}
+.article-card .art-id {
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: 12px;
+  color: var(--ink-soft);
+  letter-spacing: 0.03em;
+}
+.article-card .art-enter {
+  margin-top: auto;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.article-card:hover .art-enter { color: var(--gold); transform: translateX(4px); }
+
+/* SECTION: reader */
+.reader {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 36px 3.5vw 40px;
+  box-shadow: 0 2px 6px rgba(20, 24, 32, 0.04), 0 10px 26px rgba(20, 24, 32, 0.05);
+  max-width: 920px;
+  margin: 0 auto;
+}
+.reader .art-theme {
+  font-size: 14px;
+  color: var(--gold);
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+.reader h1 {
+  font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: clamp(26px, 3.2vw, 38px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.reader .art-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.reader .art-tag {
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--gold);
+  border: 1px solid rgba(183, 137, 47, 0.3);
+}
+.reader .art-id {
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  letter-spacing: 0.03em;
+}
+.reader hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line), transparent);
+  margin: 24px 0 22px;
+}
+.reader .wiki-body {
+  font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 17px;
+  line-height: 2;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+.reader .wiki-body p { margin: 10px 0; overflow-wrap: anywhere; }
+.reader .wiki-body p.tip {
+  background: var(--gold-soft);
+  border-left: 3px solid var(--gold);
+  padding: 10px 16px;
+  border-radius: 0 10px 10px 0;
+  color: #7a5a1a;
+}
+.reader .wiki-body figure {
+  margin: 18px 0;
+  text-align: center;
+}
+.reader .wiki-body figure img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(20, 24, 32, 0.12);
+  border: 1px solid var(--line);
+}
+.reader .wiki-body .copy-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+.reader .wiki-body .url-link {
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: 16px;
+  color: var(--gold);
+  word-break: break-all;
+}
+.reader .wiki-body .copy-btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.reader .wiki-body .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+.reader .wiki-body .copy-btn.copied { color: var(--done-a); border-color: rgba(47, 110, 81, 0.4); }
+
+/* SECTION: empty/error */
+.empty-state {
+  text-align: center;
+  padding: 70px 20px;
+  background: var(--card);
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+}
+.empty-state svg { width: 54px; height: 54px; margin-bottom: 16px; }
+.empty-state h2 { font-size: 21px; margin-bottom: 10px; letter-spacing: 0.06em; }
+.empty-state p { color: var(--ink-soft); font-size: 14.5px; line-height: 1.8; }
+
+/* SECTION: footer */
+.page-footer {
+  text-align: center;
+  padding: 14px 20px 28px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+/* SECTION: responsive */
+@media (max-width: 640px) {
+  .page-header { padding-top: 20px; }
+  main { padding: 20px 16px 30px; }
+  .article-grid { grid-template-columns: 1fr; gap: 16px; }
+  .reader { padding: 24px 18px; }
+  .reader .wiki-body { font-size: 16px; line-height: 1.9; }
+}
+</style>
+</head>
+<body>
+
+<div class="view-topbar">
+  <div class="topbar-left">
+    <a class="btn btn-ghost" href="../index.html">← 班级主页</a>
+  </div>
+  <span></span>
+</div>
+
+<header class="page-header">
+  <div class="title-block">
+    <h1 id="page-title">班级 Wiki</h1>
+    <div class="title-rule"></div>
+    <p class="subtitle" id="page-subtitle">班级知识库 · 资料、经验与教程</p>
+  </div>
+</header>
+
+<main>
+  <div class="article-grid">
+    <a class="article-card" href="10086-1-717.html">
+      <div class="art-theme">班级Tools本地快捷方式部署</div>
+      <h2>通过网页模式 高级版【windows】</h2>
+      <span class="art-tag">仅限717班电脑（已安装NeXuS）</span>
+      <span class="art-id">编号 10086-1-717</span>
+      <span class="art-enter">阅读全文 →</span>
+    </a>
+    <a class="article-card" href="10086-1-others.html">
+      <div class="art-theme">班级Tools本地快捷方式部署</div>
+      <h2>通过网页模式 标准版【windows】</h2>
+      <span class="art-tag">所有电脑通用（winall）</span>
+      <span class="art-id">编号 10086-1-others</span>
+      <span class="art-enter">阅读全文 →</span>
+    </a><a class="article-card" href="10086-2-apiuse.html">
+      <div class="art-theme">班级Tools API开放支持</div>
+      <h2>通过API连接随机抽取 进阶玩法【全平台】</h2>
+      <span class="art-tag">全平台支持</span>
+      <span class="art-id">编号 10086-2-apiuse</span>
+      <span class="art-enter">阅读全文 →</span>
+    </a>
+  </div>
+</main>
+
+<footer class="page-footer">
+  <p>班级 Wiki · 工具使用说明 · 文章源自同目录文本，纯静态页面</p>
+</footer>
+
+<script type="module" src="../ext/static.cloudflareinsights.com/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"14c5f7de53ca40a9aaaf4550cdf47b2e","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

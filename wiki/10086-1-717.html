@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/jpeg" href="../ext/makerworld.bblmw.cn/8a23402c1ca2ea2d.jpg" />
+<title>通过网页模式 高级版【windows】 · 班级 Wiki</title>
+<style>
+/* SECTION: font-face 得意黑（Smiley Sans） */
+@font-face {
+  font-family: 'SmileySans';
+  src: url('../ext/1858374084.cdn.123clouddisk.com/38138536') format('truetype');
+  font-display: swap;
+  font-weight: 400 900;
+}
+
+/* SECTION: base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #f6f4ef;
+  --ink: #1c2430;
+  --ink-soft: #5c6673;
+  --gold: #b7892f;
+  --gold-soft: rgba(183, 137, 47, 0.14);
+  --line: #e8e3d8;
+  --done-a: #1f4d3a;
+}
+html, body { min-height: 100%; }
+body {
+  font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+  background:
+    radial-gradient(1100px 520px at 85% -10%, rgba(183, 137, 47, 0.09), transparent 60%),
+    radial-gradient(900px 480px at -10% 0%, rgba(28, 36, 48, 0.06), transparent 55%),
+    var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+}
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 500;
+  background: linear-gradient(90deg, transparent, #d4a94e 22%, #f0d795 50%, #d4a94e 78%, transparent);
+}
+
+/* SECTION: topbar */
+.view-topbar {
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 22px 4vw 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 8px 18px; border-radius: 999px; border: 1px solid var(--line);
+  font-size: 14px; letter-spacing: 0.06em; cursor: pointer; text-decoration: none;
+  color: var(--ink-soft); background: transparent; font-family: inherit;
+  transition: transform 0.15s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.btn:active { transform: scale(0.96); }
+.btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* SECTION: reader */
+main {
+  flex: 1; width: 100%; max-width: 1600px; margin: 0 auto;
+  padding: 18px 4vw 40px;
+}
+.reader {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 36px 3.5vw 40px;
+  box-shadow: 0 2px 6px rgba(20, 24, 32, 0.04), 0 10px 26px rgba(20, 24, 32, 0.05);
+}
+.reader .art-theme { font-size: 14px; color: var(--gold); letter-spacing: 0.08em; margin-bottom: 8px; }
+.reader h1 {
+  font-size: clamp(26px, 3.2vw, 38px);
+  font-weight: 800; letter-spacing: 0.04em; line-height: 1.35; color: var(--ink);
+}
+.reader .art-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.reader .art-tag {
+  font-size: 13px; letter-spacing: 0.05em; padding: 4px 12px; border-radius: 999px;
+  background: var(--gold-soft); color: var(--gold); border: 1px solid rgba(183, 137, 47, 0.3);
+}
+.reader .art-id {
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: 12.5px; color: var(--ink-soft); letter-spacing: 0.03em;
+}
+.reader hr { border: none; height: 1px; background: linear-gradient(90deg, transparent, var(--line), transparent); margin: 24px 0 22px; }
+.reader .wiki-body { font-size: 17px; line-height: 2; color: var(--ink); letter-spacing: 0.02em; }
+.reader .wiki-body p { margin: 10px 0; overflow-wrap: anywhere; }
+.reader .wiki-body p.tip {
+  background: var(--gold-soft); border-left: 3px solid var(--gold);
+  padding: 10px 16px; border-radius: 0 10px 10px 0; color: #7a5a1a;
+}
+.reader .wiki-body figure { margin: 18px 0; text-align: center; }
+.reader .wiki-body figure img {
+  width: 100%; max-width: 100%; height: auto; border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(20, 24, 32, 0.12); border: 1px solid var(--line);
+}
+.reader .wiki-body figure.fig-small img { width: 70%; }
+.reader .wiki-body figure.fig-50 img { width: 50%; }
+.reader .wiki-body figure.fig-xs img { width: 15%; }
+.reader .wiki-body .copy-line { display: inline-flex; align-items: center; gap: 8px; margin: 6px 0; }
+.reader .wiki-body .url-link {
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: 16px; color: var(--gold); word-break: break-all; text-decoration: none;
+}
+.reader .wiki-body .copy-btn {
+  border: 1px solid var(--line); background: #fff; color: var(--ink-soft);
+  font-size: 12.5px; padding: 3px 10px; border-radius: 999px; cursor: pointer; font-family: inherit;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.reader .wiki-body .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+.reader .wiki-body .copy-btn.copied { color: var(--done-a); border-color: rgba(47, 110, 81, 0.4); }
+
+.page-footer { text-align: center; padding: 14px 20px 28px; color: var(--ink-soft); font-size: 13px; letter-spacing: 0.04em; }
+
+@media (max-width: 640px) {
+  main { padding: 20px 16px 30px; }
+  .reader { padding: 24px 18px; }
+  .reader .wiki-body { font-size: 16px; line-height: 1.9; }
+}
+</style>
+</head>
+<body>
+
+<div class="view-topbar">
+  <div class="topbar-left">
+    <a class="btn" href="index.html">← Wiki 列表</a>
+    <a class="btn" href="../index.html">← 班级主页</a>
+  </div>
+  <span></span>
+</div>
+
+<main>
+  <article class="reader">
+    <div class="art-theme">班级Tools本地快捷方式部署</div>
+    <h1>通过网页模式 高级版【windows】</h1>
+    <div class="art-meta">
+      <span class="art-tag">仅限717班电脑（已安装NeXuS）</span>
+      <span class="art-id">编号 10086-1-717</span>
+    </div>
+    <hr />
+    <div class="wiki-body">
+      <p>让班级工具触手可得，入驻电脑桌面</p>
+
+      <p>1. 在应用栏的任意图标上右击（触控为长按）</p>
+      <figure><img src="../ext/makerworld.bblmw.cn/44aa46c961902d9b.png" alt="步骤1" loading="lazy" /></figure>
+
+      <p>2. 插入新的Dock项目 &gt; 项目</p>
+      <figure><img src="../ext/makerworld.bblmw.cn/1208466ba3a87875.png" alt="步骤2" loading="lazy" /></figure>
+
+      <p>3. 填写属性配置:</p>
+      <p>① 类型 &gt; 网址，标签随意</p>
+      <p>② 更改图标：查找该文件夹中的图标（粘贴指定路径），随便选一个顺眼的、合适的即可</p>
+      <p>③ 点确定</p>
+
+      <p class="tip">Tip：网址填写必须加协议（http://）（主域名记忆：cs长沙ningxiang宁乡.com）</p>
+      <p>网址：</p>
+      <div class="copy-line">
+        <a class="url-link" href="https://10086.csningxiang.com" target="_blank" rel="noopener">http://10086.csningxiang.com</a>
+        <button type="button" class="copy-btn" data-url="http://10086.csningxiang.com">复制</button>
+      </div>
+      <p>若使用无效，填写备用</p>
+      <div class="copy-line">
+        <a class="url-link" href="http://classtools.csningxiang.com" target="_blank" rel="noopener">http://classtools.csningxiang.com</a>
+        <button type="button" class="copy-btn" data-url="http://classtools.csningxiang.com">复制</button>
+      </div>
+      <p>路径：</p>
+      <div class="copy-line">
+        <a class="url-link" href="#">%SystemRoot%\System32\SHELL32.dll</a>
+        <button type="button" class="copy-btn" data-url="%SystemRoot%\System32\SHELL32.dll">复制</button>
+      </div>
+
+      <figure><img src="../ext/makerworld.bblmw.cn/711898e21c96a699.png" alt="属性配置" loading="lazy" /></figure>
+
+      <p>4. 完成 选择的图标将展现，如选的是星星，点击将调用edge打开</p>
+      <figure class="fig-50"><img src="../ext/makerworld.bblmw.cn/7e68f21fa429dc93.png" alt="完成效果" loading="lazy" /></figure>
+    </div>
+  </article>
+</main>
+
+<footer class="page-footer">
+  <p>班级 Wiki · 工具使用说明 · 文章编号 10086-1-717</p>
+</footer>
+
+<script>
+document.querySelectorAll('.copy-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var url = btn.getAttribute('data-url');
+    if (!url) { return; }
+    navigator.clipboard.writeText(url).then(function () {
+      btn.textContent = '已复制';
+      btn.classList.add('copied');
+      setTimeout(function () { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1500);
+    }).catch(function () {
+      btn.textContent = '复制失败';
+      setTimeout(function () { btn.textContent = '复制'; }, 1500);
+    });
+  });
+});
+</script>
+<script type="module" src="../ext/static.cloudflareinsights.com/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"14c5f7de53ca40a9aaaf4550cdf47b2e","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

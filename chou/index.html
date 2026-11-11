@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- SECTION: site-icon -->
+<link rel="icon" type="image/jpeg" href="../ext/1858374084.cdn.123clouddisk.com/38273346#" />
+<title>随机点名 · 班级 Tools</title>
+<style>
+/* SECTION: font-face 得意黑（Smiley Sans） */
+@font-face {
+  font-family: 'SmileySans';
+  src: url('../ext/1858374084.cdn.123clouddisk.com/38138536#') format('truetype');
+  font-display: swap;
+  font-weight: 400 900;
+}
+
+/* SECTION: base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #f6f4ef;
+  --ink: #1c2430;
+  --ink-soft: #5c6673;
+  --gold: #b7892f;
+  --gold-soft: rgba(183, 137, 47, 0.14);
+  --card: #ffffff;
+  --line: #e8e3d8;
+  --done-a: #1f4d3a;
+  --done-b: #2f6e51;
+}
+html, body { min-height: 100%; }
+body {
+  font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Source Han Sans SC", sans-serif;
+  background:
+    radial-gradient(1100px 520px at 85% -10%, rgba(183, 137, 47, 0.09), transparent 60%),
+    radial-gradient(900px 480px at -10% 0%, rgba(28, 36, 48, 0.06), transparent 55%),
+    var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+}
+body::before { /* 顶部金线，品牌感装饰 */
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 500;
+  background: linear-gradient(90deg, transparent, #d4a94e 22%, #f0d795 50%, #d4a94e 78%, transparent);
+}
+.hidden { display: none !important; }
+
+/* SECTION: header */
+.page-header {
+  max-width: 1720px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 26px 3.2vw 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.title-block { text-align: center; }
+.title-block h1 {
+  font-family: 'SmileySans', "Noto Serif SC", "Source Han Serif SC", "STZhongsong", "SimSun", serif;
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+}
+.title-rule {
+  width: 76px;
+  height: 3px;
+  margin: 12px auto 8px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.subtitle { color: var(--ink-soft); font-size: 15px; letter-spacing: 0.08em; }
+
+/* SECTION: buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary {
+  background: linear-gradient(135deg, #232d3c, #1c2430 60%, #28344a);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(28, 36, 48, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.btn-primary:hover { background: linear-gradient(135deg, #2c3949, #232d3c 60%, #33415c); transform: translateY(-1px); }
+.btn-ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink-soft);
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* SECTION: topbar */
+.view-topbar {
+  max-width: 1720px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 22px 3.2vw 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.btn-back { padding: 8px 18px; font-size: 14px; }
+
+/* SECTION: layout */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 1720px;
+  margin: 0 auto;
+  padding: 18px 3.2vw 36px;
+}
+.pick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.08fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+.pick-panel {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px 18px 20px;
+  box-shadow: 0 2px 6px rgba(20, 24, 32, 0.04), 0 10px 26px rgba(20, 24, 32, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+.center-col { display: flex; flex-direction: column; gap: 16px; }
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.panel-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.panel-title::before {
+  content: "";
+  width: 5px;
+  height: 18px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #d4a94e, #b7892f);
+}
+.panel-count {
+  font-size: 13px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--line);
+}
+
+/* SECTION: stepper */
+.stepper-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 14px 0 0;
+}
+.stepper-label { font-size: 14px; color: var(--ink-soft); letter-spacing: 0.08em; }
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fdfcfa;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 8px;
+}
+.step-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--gold);
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(20, 24, 32, 0.08);
+  transition: transform 0.12s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+.step-btn:hover:not(:disabled) { border-color: var(--gold); background: var(--gold-soft); }
+.step-btn:active:not(:disabled) { transform: scale(0.92); }
+.step-btn:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+.step-num {
+  min-width: 48px;
+  text-align: center;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* SECTION: stage */
+.stage {
+  position: relative;
+  margin: 16px 0 18px;
+  min-height: 250px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, #ffffff 0%, #faf8f3 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 8px 22px rgba(20, 24, 32, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 26px 16px;
+  overflow: hidden;
+}
+.stage::before { /* 顶部细金线 */
+  content: "";
+  position: absolute;
+  top: 0; left: 18%; right: 18%;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, transparent, rgba(212, 169, 78, 0.55), transparent);
+}
+.stage-text {
+  font-size: clamp(40px, 4.4vw, 68px);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink);
+  word-break: break-all;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 22px;
+  width: 100%;
+}
+.winner-chip {
+  font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", sans-serif;
+  background-image: linear-gradient(180deg, #e6c56b 0%, #c99a3a 55%, #b7892f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 12px rgba(183, 137, 47, 0.25));
+  animation: result-pop 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+}
+/* 大字体：抽组始终如此（一行一个）；抽人 8 个及以下 */
+.stage-text.size-lg {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  font-size: clamp(34px, 3.8vw, 60px);
+  gap: 2px 0;
+}
+/* 中字体：抽人 9-15 个，一行 2 个，比旧版多结果字号大 */
+.stage-text.size-md {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  justify-content: center;
+  font-size: clamp(32px, 3.2vw, 48px);
+  gap: 4px 30px;
+}
+/* 抽人 16 个及以上：照旧 */
+.stage-text.size-sm {
+  font-size: clamp(28px, 3vw, 44px);
+  gap: 8px 18px;
+}
+.stage-text.rolling {
+  color: var(--ink-soft);
+  animation: roll-flicker 0.1s linear infinite;
+}
+@keyframes roll-flicker {
+  0% { opacity: 0.55; }
+  100% { opacity: 1; }
+}
+.stage-text.result {
+  background-image: linear-gradient(180deg, #e6c56b 0%, #c99a3a 55%, #b7892f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 12px rgba(183, 137, 47, 0.25));
+  animation: result-pop 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+}
+@keyframes result-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.stage-sub {
+  font-size: 14px;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
+  min-height: 20px;
+  text-align: center;
+}
+.btn-pick { width: 100%; padding: 14px 24px; font-size: 17px; font-weight: 700; letter-spacing: 0.16em; text-indent: 0.16em; }
+
+/* SECTION: dashboard */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.dash-tile {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px 12px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(20, 24, 32, 0.04), 0 10px 26px rgba(20, 24, 32, 0.05);
+}
+.dash-num {
+  font-family: 'SmileySans', "Noto Serif SC", "Source Han Serif SC", "STZhongsong", "SimSun", serif;
+  font-size: clamp(32px, 3vw, 42px);
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1.1;
+}
+.dash-label { font-size: 13.5px; color: var(--ink-soft); letter-spacing: 0.14em; text-indent: 0.14em; }
+
+/* SECTION: history */
+.history-panel {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 2px 6px rgba(20, 24, 32, 0.04), 0 10px 26px rgba(20, 24, 32, 0.05);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+}
+.rec-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 620px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.rec-card {
+  background: linear-gradient(160deg, #ffffff 0%, #fdfcf9 100%);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 2px rgba(20, 24, 32, 0.04);
+  animation: rec-in 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.1) both;
+}
+@keyframes rec-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
+}
+.rec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.rec-type {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.type-person { background: var(--gold-soft); color: var(--gold); border: 1px solid rgba(183, 137, 47, 0.3); }
+.type-group { background: rgba(47, 110, 81, 0.1); color: var(--done-a); border: 1px solid rgba(47, 110, 81, 0.28); }
+.rec-time { font-size: 12.5px; color: var(--ink-soft); letter-spacing: 0.03em; white-space: nowrap; }
+.rec-name { font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 0.05em; line-height: 1.3; overflow-wrap: anywhere; }
+.rec-sub { font-size: 13px; color: var(--ink-soft); line-height: 1.7; margin-top: 4px; overflow-wrap: anywhere; }
+.rec-empty {
+  margin-top: 12px;
+  flex: 1;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  line-height: 2;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* SECTION: empty-state */
+.empty-state {
+  text-align: center;
+  padding: 70px 20px;
+  background: var(--card);
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+}
+.empty-state svg { width: 54px; height: 54px; margin-bottom: 16px; }
+.empty-state h2 { font-size: 21px; margin-bottom: 10px; letter-spacing: 0.06em; }
+.empty-state p { color: var(--ink-soft); font-size: 14.5px; line-height: 1.8; }
+.empty-state .btn { margin-top: 20px; }
+
+/* SECTION: admin-panel */
+.admin-header { text-align: center; padding: 22px 16px 4px; }
+.admin-header h1 {
+  font-family: 'SmileySans', "Noto Serif SC", "Source Han Serif SC", "STZhongsong", "SimSun", serif;
+  font-size: clamp(24px, 3.6vw, 32px);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-indent: 0.16em;
+}
+.admin-header p { color: var(--ink-soft); font-size: 14px; letter-spacing: 0.05em; }
+.admin-header p b { color: var(--gold); }
+.panel {
+  width: 100%;
+  max-width: 720px;
+  margin: 18px auto 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(20, 24, 32, 0.06);
+}
+.editor-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.editor-label span { font-size: 15px; font-weight: 600; letter-spacing: 0.05em; }
+.editor-label small { color: var(--ink-soft); font-size: 12.5px; text-align: right; }
+textarea {
+  width: 100%;
+  min-height: 360px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--ink);
+  background: #fdfcfa;
+  resize: vertical;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(183, 137, 47, 0.15);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+.status-msg {
+  margin-top: 18px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  line-height: 1.7;
+  display: none;
+}
+.status-msg.ok {
+  display: block;
+  background: rgba(47, 110, 81, 0.1);
+  color: #1f4d3a;
+  border: 1px solid rgba(47, 110, 81, 0.25);
+}
+.status-msg.err {
+  display: block;
+  background: rgba(180, 60, 60, 0.08);
+  color: #9c3535;
+  border: 1px solid rgba(180, 60, 60, 0.25);
+}
+
+/* SECTION: footer */
+.page-footer {
+  text-align: center;
+  padding: 14px 20px 24px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+/* SECTION: responsive */
+@media (max-width: 1100px) {
+  .pick-grid { grid-template-columns: 1fr 1fr; }
+  .center-col { grid-column: 1 / -1; order: 3; }
+  .pick-panel:nth-child(1) { order: 1; }
+  .pick-panel:nth-child(3) { order: 2; }
+  .rec-list { max-height: none; }
+}
+@media (max-width: 900px) {
+  .page-header { padding-top: 20px; }
+  main { padding: 14px 16px 30px; }
+  .view-topbar { padding: 16px 16px 0; }
+}
+@media (max-width: 640px) {
+  .pick-grid { grid-template-columns: 1fr; }
+  .center-col { grid-column: auto; }
+  .btn { padding: 9px 18px; font-size: 14px; }
+  .stage { min-height: 210px; }
+  .panel { padding: 20px; border-radius: 14px; }
+  textarea { min-height: 280px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SECTION: view-main -->
+<div id="view-main">
+  <div class="view-topbar">
+    <div class="topbar-left">
+      <a class="btn btn-ghost btn-back" href="../index.html">← 班级主页</a>
+    </div>
+    <button class="btn btn-ghost btn-back" id="manage-names-btn" type="button">管理名单</button>
+  </div>
+
+  <header class="page-header">
+    <div class="title-block">
+      <h1>随机点名</h1>
+      <div class="title-rule"></div>
+      <p class="subtitle">个人 · 小组 双模式抽签 · 洗牌算法 · 记录本地留存</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="pick-grid" id="pick-grid">
+      <!-- 左栏：抽取个人 -->
+      <section class="pick-panel">
+        <div class="panel-head">
+          <h2 class="panel-title">抽取个人</h2>
+          <span class="panel-count" id="person-count">0 人</span>
+        </div>
+        <div class="stepper-row">
+          <span class="stepper-label">抽取人数</span>
+          <div class="stepper">
+            <button type="button" class="step-btn" id="person-minus" aria-label="减少抽取人数">−</button>
+            <span class="step-num" id="person-num">1</span>
+            <button type="button" class="step-btn" id="person-plus" aria-label="增加抽取人数">＋</button>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="stage-text" id="person-text">准备就绪</div>
+          <div class="stage-sub" id="person-sub">点击下方按钮开始点名</div>
+        </div>
+        <button class="btn btn-primary btn-pick" id="pick-person-btn" type="button" data-primary-action>开始抽人</button>
+      </section>
+
+      <!-- 中栏：数据看板 + 历史记录 -->
+      <section class="center-col">
+        <div class="dash-grid">
+          <div class="dash-tile">
+            <span class="dash-num" id="dash-people">0</span>
+            <span class="dash-label">总人数</span>
+          </div>
+          <div class="dash-tile">
+            <span class="dash-num" id="dash-groups">0</span>
+            <span class="dash-label">总组数</span>
+          </div>
+        </div>
+        <div class="history-panel">
+          <div class="panel-head">
+            <h2 class="panel-title">抽取记录</h2>
+            <span class="panel-count">最近 10 条 · 不可删除</span>
+          </div>
+          <div class="rec-list" id="rec-list"></div>
+          <div class="rec-empty" id="rec-empty">还没有抽取记录<br />按下按钮，开始第一次点名</div>
+        </div>
+      </section>
+
+      <!-- 右栏：抽取小组 -->
+      <section class="pick-panel">
+        <div class="panel-head">
+          <h2 class="panel-title">抽取小组</h2>
+          <span class="panel-count" id="group-count">0 组</span>
+        </div>
+        <div class="stepper-row">
+          <span class="stepper-label">抽取组数</span>
+          <div class="stepper">
+            <button type="button" class="step-btn" id="group-minus" aria-label="减少抽取组数">−</button>
+            <span class="step-num" id="group-num">1</span>
+            <button type="button" class="step-btn" id="group-plus" aria-label="增加抽取组数">＋</button>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="stage-text" id="group-text">准备就绪</div>
+          <div class="stage-sub" id="group-sub">点击下方按钮开始抽组</div>
+        </div>
+        <button class="btn btn-primary btn-pick" id="pick-group-btn" type="button" data-primary-action>开始抽组</button>
+      </section>
+    </div>
+
+    <div class="empty-state hidden" id="no-names">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#b7892f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="4" y="3" width="16" height="18" rx="2"></rect>
+        <path d="M8 8h8M8 12h8M8 16h5"></path>
+      </svg>
+      <h2>还没有录入名单</h2>
+      <p>名单与「打卡记录」共用，前往名单管理粘贴学生名单（或读取 name.txt），保存后即可开始点名。</p>
+      <button class="btn btn-primary" id="goto-admin-btn" type="button">前往名单管理</button>
+    </div>
+  </main>
+</div>
+
+<!-- SECTION: view-admin -->
+<div id="view-admin" class="hidden">
+  <div class="view-topbar">
+    <div class="topbar-left">
+      <a class="btn btn-ghost btn-back" href="../index.html">← 班级主页</a>
+      <button class="btn btn-ghost btn-back" id="admin-back-btn" type="button">← 返回点名</button>
+    </div>
+    <span></span>
+  </div>
+  <header class="admin-header">
+    <h1>名单管理</h1>
+    <div class="title-rule"></div>
+    <p>名单与「打卡记录」<b>全局共用</b>，保存后两个工具立即生效</p>
+  </header>
+  <main>
+    <section class="panel">
+      <div class="editor-label">
+        <span>学生名单</span>
+        <small>一行一个名字 · 以 # 结尾的行是小组标题 · 重复与空行自动过滤</small>
+      </div>
+      <textarea id="name-input" placeholder="例如：&#10;第一组#&#10;张伟&#10;李娜&#10;第二组#&#10;王昌龄&#10;……"></textarea>
+      <div class="actions">
+        <button class="btn btn-primary" id="save-names-btn" type="button" data-primary-action>保存名单</button>
+        <button class="btn btn-ghost" id="load-txt-btn" type="button">读取 name.txt</button>
+      </div>
+      <div class="status-msg" id="status-msg"></div>
+    </section>
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p>名单与打卡记录共用 · 抽取记录仅保存在当前浏览器本地（最近 10 条）</p>
+</footer>
+
+<script>
+// SECTION: constants
+var LS_NAMES_GLOBAL = 'zzx_mp_names_global'; // 与打卡记录共用的全局名单
+var LS_HISTORY = 'zzx_chou_history_v1';
+var NAME_TXT_URL = '../daka/name.txt';
+var UNGROUPED_NAME = '全体';
+var ROLL_MS = 500;   // 按下按钮后名字滚动时长
+var ROLL_TICK = 50;  // 滚动刷新间隔
+var HISTORY_MAX = 10;
+var DEFAULT_PICK_COUNT = 1; // 抽取数默认值契约：初始为 1，步进器显式调整
+
+// SECTION: state
+var groups = [];     // [{name, members:[]}]
+var allNames = [];   // 去重后的全部姓名
+var groupOf = {};    // 姓名 -> 组名
+var rolling = false;
+var personCount = DEFAULT_PICK_COUNT; // 左栏抽取人数（显式输入，唯一数据源）
+var groupCount = DEFAULT_PICK_COUNT;  // 右栏抽取组数
+
+var personText = document.getElementById('person-text');
+var personSub = document.getElementById('person-sub');
+var groupText = document.getElementById('group-text');
+var groupSub = document.getElementById('group-sub');
+var pickPersonBtn = document.getElementById('pick-person-btn');
+var pickGroupBtn = document.getElementById('pick-group-btn');
+var nameInput = document.getElementById('name-input');
+var statusMsg = document.getElementById('status-msg');
+
+// SECTION: utils
+function pad2(x) { return String(x).padStart(2, '0'); }
+
+function fmtDateTime(ts) {
+  var d = new Date(ts);
+  return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日 ' +
+    pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+}
+
+// Fisher-Yates 洗牌算法，返回打乱后的新数组
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i];
+    a[i] = a[j];
+    a[j] = t;
+  }
+  return a;
+}
+
+// SECTION: names-storage
+function loadGlobalNames() {
+  try {
+    var raw = localStorage.getItem(LS_NAMES_GLOBAL);
+    if (raw) {
+      var arr = JSON.parse(raw);
+      if (Array.isArray(arr)) {
+        return arr.filter(function (n) { return typeof n === 'string' && n.trim() !== ''; });
+      }
+    }
+  } catch (e) { /* 解析失败按空名单处理 */ }
+  return [];
+}
+
+function saveGlobalNames(list) {
+  try { localStorage.setItem(LS_NAMES_GLOBAL, JSON.stringify(list)); } catch (e) { /* 静默降级 */ }
+}
+
+// 名单格式：以「组名#」结尾的行是小组标题，其后的行是该组成员；
+// 分组标记之前的名字归入默认组「全体」，兼容无分组名单。
+function parseGroups(list) {
+  var gs = [];
+  var cur = null;
+  var headless = [];
+  list.forEach(function (line) {
+    if (/#$/.test(line)) {
+      var gname = line.replace(/#+$/, '').trim();
+      cur = { name: gname || UNGROUPED_NAME, members: [] };
+      gs.push(cur);
+    } else if (cur) {
+      cur.members.push(line);
+    } else {
+      headless.push(line);
+    }
+  });
+  if (headless.length > 0) {
+    gs.unshift({ name: UNGROUPED_NAME, members: headless });
+  }
+  gs = gs.filter(function (g) { return g.members.length > 0; });
+  if (gs.length === 0 && list.length > 0) {
+    gs.push({ name: UNGROUPED_NAME, members: list.slice() });
+  }
+  return gs;
+}
+
+function normalizeTxt(text) {
+  var seen = {};
+  var out = [];
+  text.split(/\r?\n/).forEach(function (line) {
+    var n = line.trim();
+    var key = /#$/.test(n) ? n + '::group' : n;
+    if (n && !seen[key]) { seen[key] = true; out.push(n); }
+  });
+  return out;
+}
+
+function loadNames() {
+  groups = parseGroups(loadGlobalNames());
+  allNames = [];
+  groupOf = {};
+  groups.forEach(function (g) {
+    g.members.forEach(function (n) {
+      if (!(n in groupOf)) { groupOf[n] = g.name; }
+      if (allNames.indexOf(n) === -1) { allNames.push(n); }
+    });
+  });
+}
+
+// SECTION: history-storage
+function loadHistory() {
+  try {
+    var arr = JSON.parse(localStorage.getItem(LS_HISTORY) || '[]');
+    if (Array.isArray(arr)) { return arr.slice(0, HISTORY_MAX); }
+  } catch (e) { /* 解析失败按空记录处理 */ }
+  return [];
+}
+
+function pushHistory(rec) {
+  var arr = loadHistory();
+  arr.unshift(rec);              // 最新在前
+  arr = arr.slice(0, HISTORY_MAX); // 仅保留最近 10 条，不可删除
+  try { localStorage.setItem(LS_HISTORY, JSON.stringify(arr)); } catch (e) { /* 静默降级 */ }
+}
+
+// SECTION: render
+// 抽取数边界统一收敛于此：最小 1，最大为对应池子容量；滚动中禁用步进器
+function updateSteppers() {
+  var pMax = Math.max(1, allNames.length);
+  var gMax = Math.max(1, groups.length);
+  personCount = Math.min(Math.max(1, personCount), pMax);
+  groupCount = Math.min(Math.max(1, groupCount), gMax);
+
+  document.getElementById('person-num').textContent = personCount;
+  document.getElementById('group-num').textContent = groupCount;
+  document.getElementById('person-minus').disabled = rolling || personCount <= 1;
+  document.getElementById('person-plus').disabled = rolling || personCount >= pMax || allNames.length === 0;
+  document.getElementById('group-minus').disabled = rolling || groupCount <= 1;
+  document.getElementById('group-plus').disabled = rolling || groupCount >= gMax || groups.length === 0;
+}
+
+function renderBoard() {
+  document.getElementById('dash-people').textContent = allNames.length;
+  document.getElementById('dash-groups').textContent = groups.length;
+  document.getElementById('person-count').textContent = allNames.length + ' 人';
+  document.getElementById('group-count').textContent = groups.length + ' 组';
+
+  var empty = allNames.length === 0;
+  document.getElementById('pick-grid').classList.toggle('hidden', empty);
+  document.getElementById('no-names').classList.toggle('hidden', !empty);
+  pickPersonBtn.disabled = empty;
+  pickGroupBtn.disabled = empty;
+
+  if (empty) {
+    personText.textContent = '未录入名单';
+    personSub.textContent = '';
+    groupText.textContent = '未录入名单';
+    groupSub.textContent = '';
+    personText.classList.remove('result', 'rolling', 'size-lg', 'size-md', 'size-sm');
+    groupText.classList.remove('result', 'rolling', 'size-lg', 'size-md', 'size-sm');
+  }
+  updateSteppers();
+}
+
+// SECTION: stepper
+function bindStepper(minusId, plusId, getCount, setCount) {
+  document.getElementById(minusId).addEventListener('click', function () {
+    if (rolling) { return; }
+    setCount(Math.max(1, getCount() - 1));
+    updateSteppers();
+  });
+  document.getElementById(plusId).addEventListener('click', function () {
+    if (rolling) { return; }
+    setCount(getCount() + 1); // 上限在 updateSteppers 中统一钳制
+    updateSteppers();
+  });
+}
+bindStepper('person-minus', 'person-plus',
+  function () { return personCount; },
+  function (v) { personCount = v; });
+bindStepper('group-minus', 'group-plus',
+  function () { return groupCount; },
+  function (v) { groupCount = v; });
+
+function renderHistory() {
+  var arr = loadHistory();
+  var list = document.getElementById('rec-list');
+  var empty = document.getElementById('rec-empty');
+  list.innerHTML = '';
+  empty.classList.toggle('hidden', arr.length > 0);
+  arr.forEach(function (r) {
+    var card = document.createElement('article');
+    card.className = 'rec-card';
+
+    var head = document.createElement('div');
+    head.className = 'rec-head';
+    var badge = document.createElement('span');
+    badge.className = 'rec-type ' + (r.type === 'person' ? 'type-person' : 'type-group');
+    badge.textContent = r.type === 'person' ? '个人' : '小组';
+    var time = document.createElement('span');
+    time.className = 'rec-time';
+    time.textContent = fmtDateTime(r.t);
+    head.appendChild(badge);
+    head.appendChild(time);
+
+    var name = document.createElement('div');
+    name.className = 'rec-name';
+    var sub = document.createElement('div');
+    sub.className = 'rec-sub';
+    if (r.type === 'person') {
+      // 兼容旧版单条记录 {name, group}
+      var items = Array.isArray(r.items) ? r.items : [{ name: r.name, group: r.group || '' }];
+      name.textContent = items.map(function (i) { return i.name; }).join('、');
+      var gnames = [];
+      items.forEach(function (i) { if (i.group && gnames.indexOf(i.group) === -1) { gnames.push(i.group); } });
+      if (gnames.length === 1) {
+        sub.textContent = '来自「' + gnames[0] + '」';
+      } else if (gnames.length > 1) {
+        sub.textContent = '来自「' + gnames.slice(0, 3).join('」「') + '」等 ' + gnames.length + ' 个小组';
+      }
+    } else {
+      // 兼容旧版单组记录 {group, members}
+      var gitems = Array.isArray(r.items) ? r.items : [{ name: r.group, members: r.members || [] }];
+      name.textContent = gitems.map(function (i) { return i.name; }).join('、');
+      if (gitems.length === 1) {
+        sub.textContent = (gitems[0].members || []).join('、');
+      } else {
+        sub.textContent = '共 ' + gitems.reduce(function (acc, i) { return acc + (i.members ? i.members.length : 0); }, 0) + ' 名成员';
+      }
+    }
+
+    card.appendChild(head);
+    card.appendChild(name);
+    if (sub.textContent) { card.appendChild(sub); }
+    list.appendChild(card);
+  });
+}
+
+// SECTION: pick
+function pick(kind) {
+  if (rolling || allNames.length === 0) { return; }
+  rolling = true;
+  pickPersonBtn.disabled = true;
+  pickGroupBtn.disabled = true;
+  updateSteppers(); // 滚动期间锁定步进器
+
+  var isPerson = kind === 'person';
+  var textEl = isPerson ? personText : groupText;
+  var subEl = isPerson ? personSub : groupSub;
+
+  textEl.classList.remove('result', 'size-lg', 'size-md', 'size-sm');
+  textEl.classList.add('rolling');
+  subEl.textContent = '';
+
+  // 洗牌后取前 N 个：N 由步进器显式指定，边界已在 updateSteppers 钳制
+  var count, pool, labels, rec, membersTotal = 0;
+  var now = Date.now();
+  if (isPerson) {
+    count = Math.min(personCount, allNames.length);
+    var order = shuffle(allNames);
+    var winners = order.slice(0, Math.max(1, count));
+    pool = order;
+    labels = winners;
+    rec = {
+      type: 'person',
+      t: now,
+      items: winners.map(function (n) { return { name: n, group: groupOf[n] || '' }; })
+    };
+  } else {
+    count = Math.min(groupCount, groups.length);
+    var gorder = shuffle(groups);
+    var gwinners = gorder.slice(0, Math.max(1, count));
+    pool = gorder.map(function (g) { return g.name; });
+    labels = gwinners.map(function (g) { return g.name; });
+    gwinners.forEach(function (g) { membersTotal += g.members.length; });
+    rec = {
+      type: 'group',
+      t: now,
+      items: gwinners.map(function (g) { return { name: g.name, members: g.members.slice() }; })
+    };
+  }
+
+  // 0.5s 名字滚动
+  var idx = 0;
+  var timer = setInterval(function () {
+    textEl.textContent = pool[idx % pool.length];
+    idx++;
+  }, ROLL_TICK);
+
+  setTimeout(function () {
+    clearInterval(timer);
+    textEl.classList.remove('rolling');
+    textEl.innerHTML = '';
+    // 字号分级：抽组始终大字体一行一个；抽人 ≤8 大、9-15 中（一行2个）、≥16 照旧
+    var sizeClass;
+    if (!isPerson) {
+      sizeClass = 'size-lg';
+    } else if (labels.length <= 8) {
+      sizeClass = 'size-lg';
+    } else if (labels.length <= 15) {
+      sizeClass = 'size-md';
+    } else {
+      sizeClass = 'size-sm';
+    }
+    textEl.classList.add(sizeClass);
+    labels.forEach(function (label, i) {
+      var chip = document.createElement('span');
+      chip.className = 'winner-chip';
+      chip.textContent = label; // 大字体展示名/组
+      chip.style.animationDelay = (i * 70) + 'ms'; // 多个结果依次弹出
+      textEl.appendChild(chip);
+    });
+
+    if (isPerson) {
+      subEl.textContent = labels.length === 1
+        ? '来自「' + (rec.items[0].group || UNGROUPED_NAME) + '」'
+        : '共抽取 ' + labels.length + ' 人';
+    } else {
+      subEl.textContent = labels.length === 1
+        ? '共 ' + membersTotal + ' 名成员'
+        : '共抽取 ' + labels.length + ' 组 · ' + membersTotal + ' 名成员';
+    }
+
+    rolling = false;
+    pickPersonBtn.disabled = allNames.length === 0;
+    pickGroupBtn.disabled = groups.length === 0;
+    updateSteppers();
+
+    pushHistory(rec);
+    renderHistory();
+  }, ROLL_MS);
+}
+
+pickPersonBtn.addEventListener('click', function () { pick('person'); });
+pickGroupBtn.addEventListener('click', function () { pick('group'); });
+
+// SECTION: admin-view
+function showAdmin(show) {
+  document.getElementById('view-admin').classList.toggle('hidden', !show);
+  document.getElementById('view-main').classList.toggle('hidden', show);
+  if (show) {
+    nameInput.value = loadGlobalNames().join('\n');
+    statusMsg.className = 'status-msg';
+    statusMsg.textContent = '';
+  }
+  window.scrollTo(0, 0);
+}
+
+function showAdminStatus(type, text) {
+  statusMsg.className = 'status-msg ' + type;
+  statusMsg.textContent = text;
+}
+
+document.getElementById('manage-names-btn').addEventListener('click', function () { showAdmin(true); });
+document.getElementById('goto-admin-btn').addEventListener('click', function () { showAdmin(true); });
+document.getElementById('admin-back-btn').addEventListener('click', function () { showAdmin(false); });
+
+document.getElementById('save-names-btn').addEventListener('click', function () {
+  var list = normalizeTxt(nameInput.value);
+  if (list.length === 0) {
+    showAdminStatus('err', '名单为空：请至少输入一个名字，一行一个。');
+    return;
+  }
+  saveGlobalNames(list);
+  loadNames();
+  renderBoard();
+  showAdminStatus('ok', '名单保存成功（共 ' + allNames.length + ' 人、' + groups.length + ' 组），与打卡记录共用这份名单。');
+});
+
+document.getElementById('load-txt-btn').addEventListener('click', function () {
+  fetch(NAME_TXT_URL, { cache: 'no-cache' })
+    .then(function (res) {
+      if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      return res.text();
+    })
+    .then(function (text) {
+      var list = normalizeTxt(text);
+      if (list.length === 0) { throw new Error('name.txt 为空'); }
+      nameInput.value = list.join('\n');
+      showAdminStatus('ok', '已读取打卡记录目录下的 name.txt，共 ' + list.length + ' 行，点击「保存名单」生效。');
+    })
+    .catch(function () {
+      showAdminStatus('err', '未能读取 ' + NAME_TXT_URL + '：请确认文件存在，并通过本地服务器（如 python -m http.server）打开本页面后重试。');
+    });
+});
+
+// SECTION: init
+function init() {
+  loadNames();
+  if (allNames.length === 0) {
+    // 首次使用：尝试自动读取打卡记录的 name.txt 作为共享名单
+    fetch(NAME_TXT_URL, { cache: 'no-cache' })
+      .then(function (res) { if (!res.ok) { throw new Error('HTTP ' + res.status); } return res.text(); })
+      .then(function (text) {
+        var list = normalizeTxt(text);
+        if (list.length > 0 && loadGlobalNames().length === 0) { saveGlobalNames(list); }
+        loadNames();
+        renderBoard();
+      })
+      .catch(function () { renderBoard(); });
+  } else {
+    renderBoard();
+  }
+  renderHistory();
+}
+
+init();
+</script>
+<script type="module" src="../ext/static.cloudflareinsights.com/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"14c5f7de53ca40a9aaaf4550cdf47b2e","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

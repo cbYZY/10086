@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/jpeg" href="../ext/makerworld.bblmw.cn/8a23402c1ca2ea2d.jpg" />
+<title>通过API连接随机抽取 进阶玩法【全平台】 · 班级 Wiki</title>
+<style>
+/* SECTION: font-face 得意黑（Smiley Sans） */
+@font-face {
+  font-family: 'SmileySans';
+  src: url('../ext/1858374084.cdn.123clouddisk.com/38138536') format('truetype');
+  font-display: swap;
+  font-weight: 400 900;
+}
+
+/* SECTION: base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #f6f4ef;
+  --ink: #1c2430;
+  --ink-soft: #5c6673;
+  --gold: #b7892f;
+  --gold-soft: rgba(183, 137, 47, 0.14);
+  --line: #e8e3d8;
+  --done-a: #1f4d3a;
+}
+html, body { min-height: 100%; }
+body {
+  font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+  background:
+    radial-gradient(1100px 520px at 85% -10%, rgba(183, 137, 47, 0.09), transparent 60%),
+    radial-gradient(900px 480px at -10% 0%, rgba(28, 36, 48, 0.06), transparent 55%),
+    var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+}
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 500;
+  background: linear-gradient(90deg, transparent, #d4a94e 22%, #f0d795 50%, #d4a94e 78%, transparent);
+}
+
+/* SECTION: topbar */
+.view-topbar {
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 22px 4vw 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 8px 18px; border-radius: 999px; border: 1px solid var(--line);
+  font-size: 14px; letter-spacing: 0.06em; cursor: pointer; text-decoration: none;
+  color: var(--ink-soft); background: transparent; font-family: inherit;
+  transition: transform 0.15s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.btn:active { transform: scale(0.96); }
+.btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* SECTION: reader */
+main {
+  flex: 1; width: 100%; max-width: 1600px; margin: 0 auto;
+  padding: 18px 4vw 40px;
+}
+.reader {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 36px 3.5vw 40px;
+  box-shadow: 0 2px 6px rgba(20, 24, 32, 0.04), 0 10px 26px rgba(20, 24, 32, 0.05);
+}
+.reader .art-theme { font-size: 14px; color: var(--gold); letter-spacing: 0.08em; margin-bottom: 8px; }
+.reader h1 {
+  font-size: clamp(26px, 3.2vw, 38px);
+  font-weight: 800; letter-spacing: 0.04em; line-height: 1.35; color: var(--ink);
+}
+.reader .art-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.reader .art-tag {
+  font-size: 13px; letter-spacing: 0.05em; padding: 4px 12px; border-radius: 999px;
+  background: var(--gold-soft); color: var(--gold); border: 1px solid rgba(183, 137, 47, 0.3);
+}
+.reader .art-id {
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: 12.5px; color: var(--ink-soft); letter-spacing: 0.03em;
+}
+.reader hr { border: none; height: 1px; background: linear-gradient(90deg, transparent, var(--line), transparent); margin: 24px 0 22px; }
+.reader .wiki-body { font-size: 17px; line-height: 2; color: var(--ink); letter-spacing: 0.02em; }
+.reader .wiki-body p { margin: 10px 0; overflow-wrap: anywhere; }
+.reader .wiki-body p.tip {
+  background: var(--gold-soft); border-left: 3px solid var(--gold);
+  padding: 10px 16px; border-radius: 0 10px 10px 0; color: #7a5a1a;
+}
+.reader .wiki-body .copy-line { display: inline-flex; align-items: center; gap: 8px; margin: 6px 0; flex-wrap: wrap; }
+.reader .wiki-body .url-link {
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: 16px; color: var(--gold); word-break: break-all; text-decoration: none;
+}
+.reader .wiki-body .copy-btn {
+  border: 1px solid var(--line); background: #fff; color: var(--ink-soft);
+  font-size: 12.5px; padding: 3px 10px; border-radius: 999px; cursor: pointer; font-family: inherit;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.reader .wiki-body .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+.reader .wiki-body .copy-btn.copied { color: var(--done-a); border-color: rgba(47, 110, 81, 0.4); }
+
+/* 参数表 */
+.api-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 15.5px;
+}
+.api-table th, .api-table td {
+  border: 1px solid var(--line);
+  padding: 9px 14px;
+  text-align: left;
+  line-height: 1.7;
+}
+.api-table th { background: var(--gold-soft); color: #7a5a1a; font-weight: 700; letter-spacing: 0.05em; }
+.api-table td code {
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  background: var(--gold-soft); color: #7a5a1a;
+  padding: 1px 8px; border-radius: 6px; font-size: 14px;
+}
+
+/* 返回结果示例 */
+.code-block {
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: 15px;
+  line-height: 1.9;
+  background: #f4f1e9;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 10px 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+
+.page-footer { text-align: center; padding: 14px 20px 28px; color: var(--ink-soft); font-size: 13px; letter-spacing: 0.04em; }
+
+@media (max-width: 640px) {
+  main { padding: 20px 16px 30px; }
+  .reader { padding: 24px 18px; }
+  .reader .wiki-body { font-size: 16px; line-height: 1.9; }
+  .api-table { font-size: 14px; }
+  .api-table th, .api-table td { padding: 7px 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="view-topbar">
+  <div class="topbar-left">
+    <a class="btn" href="index.html">← Wiki 列表</a>
+    <a class="btn" href="../index.html">← 班级主页</a>
+  </div>
+  <span></span>
+</div>
+
+<main>
+  <article class="reader">
+    <div class="art-theme">班级Tools API开放支持</div>
+    <h1>通过API连接随机抽取 进阶玩法【全平台】</h1>
+    <div class="art-meta">
+      <span class="art-tag">全平台支持</span>
+      <span class="art-id">编号 10086-2-apiuse</span>
+    </div>
+    <hr />
+    <div class="wiki-body">
+      <p>一个网址就能随机抽人抽组，浏览器、手机、命令行、快捷指令全能用</p>
+
+      <p class="tip"><strong>⚠️ 必须用 server.py 启动服务！</strong>纯静态服务器（如 <code>python -m http.server</code>）无法响应动态 API 路径，会返回 404。正确启动方式：在站点根目录执行 <code>python server.py</code>（端口默认 8137），所有页面 + API 同时生效。</p>
+
+      <p class="tip">Tip：API 返回的是纯文本结果，任何能打开网址或发送网络请求的平台都可以直接使用。名单文件为 <code>chou/api/x.txt</code>，每次请求实时读取，改完即生效。</p>
+
+      <p><strong>一、工作原理</strong></p>
+      <p>API（应用程序接口）就是一个「网址即服务」：你向服务器发起一次访问（HTTP GET 请求），服务器收到后实时读取名单，用洗牌算法随机抽取，再把结果作为纯文本直接返回给你。整个过程不打开任何页面、不显示任何界面——网址本身就是「抽取按钮」，返回的内容本身就是「抽取结果」。</p>
+      <p>每次请求都是一次全新的随机抽取；同一次请求内抽出的名字或小组不会重复。名单变动（编辑 chou/api/x.txt）立即生效，无需重启服务。</p>
+
+      <p><strong>二、接口格式</strong></p>
+      <div class="copy-line">
+        <span class="url-link">/chou/api/{type}/{x}</span>
+      </div>
+      <table class="api-table">
+        <tr><th>参数</th><th>取值</th><th>说明</th></tr>
+        <tr><td><code>type</code></td><td><code>human</code> / <code>team</code></td><td>human 抽个人，team 抽小组</td></tr>
+        <tr><td><code>x</code></td><td>正整数</td><td>抽取个数；超过名单总数时按总数返回</td></tr>
+      </table>
+
+      <p><strong>三、可复制的请求地址</strong>（点开即出结果）</p>
+      <p>抽 1 名学生：</p>
+      <div class="copy-line">
+        <a class="url-link" href="https://10086.csningxiang.com/chou/api/human/1" target="_blank" rel="noopener">http://10086.csningxiang.com/chou/api/human/1</a>
+        <button type="button" class="copy-btn" data-url="http://10086.csningxiang.com/chou/api/human/1">复制</button>
+      </div>
+      <p>抽 3 名学生：</p>
+      <div class="copy-line">
+        <a class="url-link" href="https://10086.csningxiang.com/chou/api/human/3" target="_blank" rel="noopener">http://10086.csningxiang.com/chou/api/human/3</a>
+        <button type="button" class="copy-btn" data-url="http://10086.csningxiang.com/chou/api/human/3">复制</button>
+      </div>
+      <p>抽 2 个小组：</p>
+      <div class="copy-line">
+        <a class="url-link" href="https://10086.csningxiang.com/chou/api/team/2" target="_blank" rel="noopener">http://10086.csningxiang.com/chou/api/team/2</a>
+        <button type="button" class="copy-btn" data-url="http://10086.csningxiang.com/chou/api/team/2">复制</button>
+      </div>
+      <p class="tip">Tip：若主域名无效，把开头换成备用域名 classtools.csningxiang.com 即可，路径不变。</p>
+      <div class="copy-line">
+        <a class="url-link" href="http://classtools.csningxiang.com/chou/api/human/1" target="_blank" rel="noopener">http://classtools.csningxiang.com/chou/api/human/1</a>
+        <button type="button" class="copy-btn" data-url="http://classtools.csningxiang.com/chou/api/human/1">复制</button>
+      </div>
+
+      <p><strong>四、返回结果说明</strong></p>
+      <p>抽人（human/3）返回示例——每行一个名字：</p>
+      <div class="code-block">成诺
+傅子纯
+李钰轩</div>
+      <p>抽组（team/2）返回示例——每行「组名：成员列表」：</p>
+      <div class="code-block">家贝队：周家贝、任语涵、傅子纯、朱梓汐、李恩璇、刘浠辰、陈俊宇
+煜祺队：贺煜祺、谢薇怡、唐嘉阳、周泽文、陈紫萱、易子源、赵璇</div>
+
+      <p><strong>五、各平台操作方法</strong></p>
+      <p>1. <strong>浏览器（最简单）：</strong>把上面的地址粘贴到地址栏访问，或点开链接，结果直接显示在页面上。</p>
+      <p>2. <strong>Windows / Mac 命令行：</strong>系统自带 curl，打开终端输入（Win10 及以上自带）：</p>
+      <div class="code-block">curl http://10086.csningxiang.com/chou/api/human/3</div>
+      <p>3. <strong>iOS 快捷指令：</strong>新建快捷指令 → 添加「获取 URL 内容」→ 粘贴请求地址 → 运行后结果即文本内容，可配合「显示结果」或「朗读文本」实现语音抽人。</p>
+      <p>4. <strong>Android / 其他：</strong>任何支持自定义 URL 的工具（Tasker、MacroDroid、小程序云函数、自己写的脚本等）发起 GET 请求即可，返回文本就是结果。</p>
+
+      <p><strong>六、错误提示含义</strong></p>
+      <table class="api-table">
+        <tr><th>状态</th><th>含义与解决</th></tr>
+        <tr><td><code>400</code></td><td>抽取个数不是正整数（如 human/0），改为 1、2、3…</td></tr>
+        <tr><td><code>404</code></td><td>地址拼写错误，检查 type 是否为 human 或 team、路径是否为 /chou/api/ 开头</td></tr>
+        <tr><td><code>500</code></td><td>服务器名单文件缺失或为空，检查 chou/api/x.txt</td></tr>
+      </table>
+
+      <p class="tip">Tip：自定义名单只需编辑服务器上的 chou/api/x.txt——以 # 结尾的行是组名（如「家贝队#」），其下为该组成员；保存后立刻生效，抽人与抽组同步更新。</p>
+    </div>
+  </article>
+</main>
+
+<footer class="page-footer">
+  <p>班级 Wiki · 工具使用说明 · 文章编号 10086-2-apiuse</p>
+</footer>
+
+<script>
+// 复制按钮（含降级方案，兼容无剪贴板权限的环境）
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise(function (resolve, reject) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      if (document.execCommand('copy')) { resolve(); } else { reject(new Error('copy failed')); }
+    } catch (e) { reject(e); }
+    document.body.removeChild(ta);
+  });
+}
+document.querySelectorAll('.copy-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var url = btn.getAttribute('data-url');
+    if (!url) { return; }
+    copyText(url).then(function () {
+      btn.textContent = '已复制';
+      btn.classList.add('copied');
+      setTimeout(function () { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1500);
+    }).catch(function () {
+      btn.textContent = '复制失败';
+      setTimeout(function () { btn.textContent = '复制'; }, 1500);
+    });
+  });
+});
+</script>
+<script type="module" src="../ext/static.cloudflareinsights.com/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"14c5f7de53ca40a9aaaf4550cdf47b2e","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

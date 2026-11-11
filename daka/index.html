@@ -1,0 +1,2058 @@
+﻿﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- SECTION: site-icon -->
+<link rel="icon" type="image/jpeg" href="../ext/1858374084.cdn.123clouddisk.com/38273346#" />
+<title>任务打卡</title>
+<!-- SECTION: sheetjs-cdn -->
+<script src="../ext/unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+/* SECTION: font-face 得意黑（Smiley Sans） */
+@font-face {
+  font-family: 'SmileySans';
+  src: url('../ext/1858374084.cdn.123clouddisk.com/38138536#') format('truetype');
+  font-display: swap;
+  font-weight: 400 900;
+}
+/* SECTION: font-face 字魂白鸽天行体（商用需授权）—— 仅用于表扬/撤回提示词 */
+@font-face {
+  font-family: 'BaiGe';
+  src: url('../ext/1858374084.cdn.123clouddisk.com/38273347#') format('truetype');
+  font-display: swap;
+  font-weight: 400 900;
+}
+
+/* SECTION: base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #f6f4ef;
+  --ink: #1c2430;
+  --ink-soft: #5c6673;
+  --gold: #b7892f;
+  --gold-soft: rgba(183, 137, 47, 0.14);
+  --card: #ffffff;
+  --line: #e8e3d8;
+  --done-a: #1f4d3a;
+  --done-b: #2f6e51;
+}
+html, body { min-height: 100%; }
+body {
+  font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Source Han Sans SC", sans-serif;
+  background:
+    radial-gradient(1100px 520px at 85% -10%, rgba(183, 137, 47, 0.09), transparent 60%),
+    radial-gradient(900px 480px at -10% 0%, rgba(28, 36, 48, 0.06), transparent 55%),
+    var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+}
+body::before { /* 顶部金线，品牌感装饰 */
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 500;
+  background: linear-gradient(90deg, transparent, #d4a94e 22%, #f0d795 50%, #d4a94e 78%, transparent);
+}
+.hidden { display: none !important; }
+
+/* SECTION: header */
+.page-header {
+  max-width: 1720px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 26px 3.2vw 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.title-block { text-align: center; }
+.title-block h1 {
+  font-family: 'SmileySans', "Noto Serif SC", "Source Han Serif SC", "STZhongsong", "SimSun", serif;
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+}
+.title-rule {
+  width: 76px;
+  height: 3px;
+  margin: 12px auto 8px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.subtitle { color: var(--ink-soft); font-size: 15px; letter-spacing: 0.08em; }
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+.progress-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 22px;
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 14px rgba(20, 24, 32, 0.06);
+  min-width: 230px;
+}
+.progress-chip .progress-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.progress-chip b { color: var(--gold); font-size: 18px; font-weight: 800; }
+.progress-bar {
+  position: relative;
+  width: 100%;
+  height: 7px;
+  border-radius: 999px;
+  background: #efe9da;
+  overflow: hidden;
+}
+.progress-bar i {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #c99a3a, #e6c56b);
+  transition: width 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary {
+  background: linear-gradient(135deg, #232d3c, #1c2430 60%, #28344a);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(28, 36, 48, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.btn-primary:hover { background: linear-gradient(135deg, #2c3949, #232d3c 60%, #33415c); transform: translateY(-1px); }
+.btn-ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink-soft);
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--gold);
+  padding-inline: 10px;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-family: inherit;
+}
+.btn-text.danger { color: #a83a2e; }
+
+/* SECTION: topbar-badges */
+.view-topbar {
+  max-width: 1720px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 22px 3.2vw 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.btn-back { padding: 8px 18px; font-size: 14px; }
+.home-count { font-size: 13px; color: var(--ink-soft); letter-spacing: 0.05em; }
+.subject-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.sb-yuwen { background: rgba(178, 60, 50, 0.10); color: #a83a2e; border-color: rgba(178, 60, 50, 0.28); }
+.sb-yingyu { background: rgba(46, 95, 160, 0.10); color: #2e5f9e; border-color: rgba(46, 95, 160, 0.28); }
+.sb-other { background: rgba(47, 110, 81, 0.10); color: #1f4d3a; border-color: rgba(47, 110, 81, 0.28); }
+.sb-legacy { background: rgba(92, 102, 115, 0.12); color: #5c6673; border-color: rgba(92, 102, 115, 0.30); }
+
+/* SECTION: project-grid */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 1720px;
+  margin: 0 auto;
+  padding: 18px 3.2vw 36px;
+}
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+.project-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 2px 6px rgba(20, 24, 32, 0.04), 0 10px 26px rgba(20, 24, 32, 0.05);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.project-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(183, 137, 47, 0.45);
+  box-shadow: 0 14px 30px rgba(20, 24, 32, 0.12);
+}
+.pc-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pc-name {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.pc-name:hover { color: var(--gold); }
+.pc-meta { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--ink-soft); letter-spacing: 0.03em; }
+.pc-progress { display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; }
+.pc-progress .progress-line { display: flex; align-items: baseline; justify-content: space-between; }
+.pc-progress b { color: var(--gold); font-weight: 800; }
+.pc-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 2px; }
+.pc-actions .btn { padding: 8px 18px; font-size: 14px; }
+.pc-actions .btn-text { padding: 8px 6px; font-size: 13.5px; }
+
+/* SECTION: group-panel */
+.group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+.group-panel {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px 14px 16px;
+  box-shadow: 0 2px 6px rgba(20, 24, 32, 0.04), 0 10px 26px rgba(20, 24, 32, 0.05);
+}
+.group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.group-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+.group-name::before {
+  content: "";
+  width: 5px;
+  height: 18px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #d4a94e, #b7892f);
+}
+.group-count {
+  font-size: 13px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--line);
+  transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}
+.group-panel.group-done .group-count {
+  color: #1f4d3a;
+  background: rgba(47, 110, 81, 0.1);
+  border-color: rgba(47, 110, 81, 0.35);
+}
+.group-grid-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+}
+.name-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 74px;
+  padding: 10px 6px;
+  background: linear-gradient(160deg, #ffffff 0%, #faf8f3 100%);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(20, 24, 32, 0.04), 0 8px 22px rgba(20, 24, 32, 0.06);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+.name-card::before { /* 顶部细金线，卡片质感点缀 */
+  content: "";
+  position: absolute;
+  top: 0; left: 18%; right: 18%;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, transparent, rgba(212, 169, 78, 0.55), transparent);
+}
+.name-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(183, 137, 47, 0.5);
+  box-shadow: 0 14px 30px rgba(20, 24, 32, 0.12);
+}
+.name-card.done {
+  background: linear-gradient(135deg, var(--done-a), var(--done-b));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(31, 77, 58, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.name-card.done::before { background: linear-gradient(90deg, transparent, rgba(255, 223, 138, 0.65), transparent); }
+.check-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f5c663;
+  color: #1f4d3a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  animation: badge-in 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+}
+@keyframes badge-in {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+.empty-state {
+  text-align: center;
+  padding: 70px 20px;
+  background: var(--card);
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+}
+.empty-state svg { width: 54px; height: 54px; margin-bottom: 16px; }
+.empty-state h2 { font-size: 21px; margin-bottom: 10px; letter-spacing: 0.06em; }
+.empty-state p { color: var(--ink-soft); font-size: 14.5px; line-height: 1.8; }
+.empty-state .btn { margin-top: 20px; }
+
+/* SECTION: admin-panel */
+.admin-header { text-align: center; padding: 22px 16px 4px; }
+.admin-header h1 {
+  font-family: 'SmileySans', "Noto Serif SC", "Source Han Serif SC", "STZhongsong", "SimSun", serif;
+  font-size: clamp(24px, 3.6vw, 32px);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-indent: 0.16em;
+}
+.admin-header p { color: var(--ink-soft); font-size: 14px; letter-spacing: 0.05em; }
+.admin-header p b { color: var(--gold); }
+.panel {
+  width: 100%;
+  max-width: 720px;
+  margin: 18px auto 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(20, 24, 32, 0.06);
+}
+.editor-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.editor-label span { font-size: 15px; font-weight: 600; letter-spacing: 0.05em; }
+.editor-label small { color: var(--ink-soft); font-size: 12.5px; text-align: right; }
+textarea {
+  width: 100%;
+  min-height: 360px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--ink);
+  background: #fdfcfa;
+  resize: vertical;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(183, 137, 47, 0.15);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+.status-msg {
+  margin-top: 18px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  line-height: 1.7;
+  display: none;
+}
+.status-msg.ok {
+  display: block;
+  background: rgba(47, 110, 81, 0.1);
+  color: #1f4d3a;
+  border: 1px solid rgba(47, 110, 81, 0.25);
+}
+.status-msg.err {
+  display: block;
+  background: rgba(180, 60, 60, 0.08);
+  color: #9c3535;
+  border: 1px solid rgba(180, 60, 60, 0.25);
+}
+
+/* SECTION: footer */
+.page-footer {
+  text-align: center;
+  padding: 14px 20px 24px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+/* SECTION: create-modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: rgba(20, 24, 32, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal {
+  width: 100%;
+  max-width: 460px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 26px 26px 24px;
+  box-shadow: 0 24px 60px rgba(20, 24, 32, 0.3);
+  animation: modal-in 0.22s ease both;
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+.modal-head { display: flex; align-items: center; justify-content: space-between; }
+.modal-head h2 { font-size: 20px; letter-spacing: 0.08em; }
+.modal-close {
+  border: none;
+  background: none;
+  font-size: 18px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  line-height: 1;
+}
+.modal-close:hover { color: var(--ink); background: #f3efe6; }
+.field { margin-top: 18px; }
+.field label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.04em; }
+.field input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--ink);
+  background: #fdfcfa;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(183, 137, 47, 0.15);
+}
+.tab-bar { display: flex; gap: 6px; background: #f3efe6; padding: 5px; border-radius: 12px; }
+.tab-bar + input { margin-top: 10px; }
+.tab-btn {
+  flex: 1;
+  padding: 9px 0;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--ink-soft);
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.tab-btn.active {
+  background: #fff;
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(20, 24, 32, 0.10);
+}
+.form-err {
+  margin-top: 14px;
+  font-size: 13.5px;
+  color: #9c3535;
+  background: rgba(180, 60, 60, 0.08);
+  border: 1px solid rgba(180, 60, 60, 0.25);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+
+/* SECTION: export-all-modal */
+.export-all-modal { max-width: 520px; }
+.export-all-list {
+  margin-top: 16px;
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 6px;
+}
+.export-all-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.export-all-item:hover { background: #f6f4ef; }
+.export-all-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold);
+  cursor: pointer;
+  flex: none;
+}
+.export-all-item .eai-name { font-weight: 600; font-size: 15px; }
+.export-all-item .eai-meta { font-size: 12px; color: var(--ink-soft); margin-left: auto; }
+.export-all-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.export-all-toolbar a {
+  color: var(--gold);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+}
+.export-all-toolbar a:hover { text-decoration: underline; }
+
+/* SECTION: praise-overlay */
+#praise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background-color: #0d1117; /* 图片加载失败时依然保持完全不透明 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  overflow: hidden;
+}
+#praise-overlay.show { display: flex; animation: overlay-in 0.25s ease both; }
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+.praise-vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.12) 30%, rgba(0, 0, 0, 0.62) 100%);
+  pointer-events: none;
+}
+.praise-rays {
+  position: absolute; inset: -60%;
+  background: repeating-conic-gradient(from 0deg,
+    rgba(255, 214, 120, 0.14) 0deg 5deg, transparent 5deg 12deg);
+  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.9) 0%, transparent 62%);
+  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.9) 0%, transparent 62%);
+  animation: rays-spin 14s linear infinite;
+  pointer-events: none;
+}
+@keyframes rays-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.praise-halo {
+  position: absolute; left: 50%; top: 50%;
+  width: 78vmin; height: 78vmin;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 205, 90, 0.42) 0%, rgba(255, 205, 90, 0.12) 45%, transparent 70%);
+  filter: blur(6px);
+  animation: halo-pulse 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes halo-pulse {
+  0%, 100% { opacity: 0.75; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.06); }
+}
+.praise-confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.confetti-piece {
+  position: absolute; top: -12vh;
+  display: block;
+  border-radius: 2px;
+  opacity: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  animation: confetti-fall linear both;
+}
+@keyframes confetti-fall {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(var(--sway, 30px), 118vh, 0) rotate(660deg); opacity: 0.85; }
+}
+.praise-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 6vw;
+}
+.praise-text {
+  font-family: 'BaiGe', 'SmileySans', "PingFang SC", "Microsoft YaHei", serif;
+  font-size: clamp(32px, 7.4vw, 96px);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  color: #fff8e3;
+  background-image: linear-gradient(180deg, #fffbe9 0%, #ffe6a3 38%, #f7c948 62%, #ffedb8 82%, #ffdf8a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 5px 14px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 26px rgba(255, 205, 90, 0.35));
+}
+#praise-overlay.show .praise-text {
+  animation: pop-in 0.62s cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+}
+@keyframes pop-in {
+  0% { transform: scale(0.15) rotate(-4deg); opacity: 0; }
+  52% { transform: scale(1.16) rotate(1.6deg); opacity: 1; }
+  72% { transform: scale(0.95) rotate(-0.6deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* SECTION: undo-overlay */
+.undo-scene { display: none; }
+#praise-overlay.mode-undo .praise-content { display: none; }
+#praise-overlay.mode-undo .undo-scene {
+  display: block;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 6vw;
+}
+#praise-overlay.mode-undo .praise-halo {
+  background: radial-gradient(circle, rgba(140, 180, 230, 0.4) 0%, rgba(140, 180, 230, 0.12) 45%, transparent 70%);
+}
+#praise-overlay.mode-undo .praise-rays {
+  background: repeating-conic-gradient(from 0deg,
+    rgba(160, 195, 235, 0.13) 0deg 5deg, transparent 5deg 12deg);
+}
+.undo-text {
+  font-family: 'BaiGe', 'SmileySans', "PingFang SC", "Microsoft YaHei", serif;
+  font-size: clamp(30px, 6.6vw, 86px);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  background-image: linear-gradient(180deg, #f6faff 0%, #d8e6f7 38%, #9db9dc 62%, #e9f2fc 82%, #bcd3ec 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 5px 14px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 26px rgba(150, 190, 240, 0.4));
+}
+#praise-overlay.mode-undo.show .undo-text {
+  animation: pop-in 0.62s cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+}
+.undo-stage {
+  position: relative;
+  margin-top: 4vh;
+  height: 34vh;
+  min-height: 240px;
+}
+.undo-item {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2.6em;
+  margin-left: -1.3em;
+  font-family: 'BaiGe', 'SmileySans', "PingFang SC", "Microsoft YaHei", serif;
+  font-size: clamp(26px, 4.6vw, 58px);
+  font-weight: 900;
+  font-style: normal;
+  text-align: center;
+  color: #ffe6a3;
+  background-image: linear-gradient(180deg, #fffbe9, #f7c948);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5));
+  opacity: 0;
+}
+.undo-scene.play .undo-item {
+  animation: toss-in 0.5s cubic-bezier(0.3, 0.1, 0.55, 1) both;
+}
+.undo-scene.play .ui-1 { animation-delay: 0.42s; --tx: -22px; }
+.undo-scene.play .ui-2 { animation-delay: 0.78s; --tx: 6px; }
+.undo-scene.play .ui-3 { animation-delay: 1.14s; --tx: 20px; }
+@keyframes toss-in {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); opacity: 0; }
+  10% { opacity: 1; }
+  52% { transform: translate3d(calc(var(--tx) * 0.6), -4vh, 0) rotate(-170deg) scale(0.92); opacity: 1; }
+  96% { opacity: 0.9; }
+  100% { transform: translate3d(var(--tx), 21vh, 0) rotate(-330deg) scale(0.2); opacity: 0; }
+}
+.undo-bin {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(120px, 15vmin, 180px);
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45));
+  transform-origin: 50% 100%;
+}
+.undo-scene.play .undo-bin {
+  animation: bin-gulp 2s ease both;
+}
+@keyframes bin-gulp {
+  0%, 40% { transform: translateX(-50%) scale(1, 1); }
+  44% { transform: translateX(-50%) scale(1.1, 0.86); }
+  49% { transform: translateX(-50%) scale(0.97, 1.04); }
+  54%, 58% { transform: translateX(-50%) scale(1, 1); }
+  62% { transform: translateX(-50%) scale(1.1, 0.86); }
+  67% { transform: translateX(-50%) scale(0.97, 1.04); }
+  72%, 76% { transform: translateX(-50%) scale(1, 1); }
+  80% { transform: translateX(-50%) scale(1.12, 0.84); }
+  86% { transform: translateX(-50%) scale(0.96, 1.05); }
+  92%, 100% { transform: translateX(-50%) scale(1, 1); }
+}
+
+/* SECTION: responsive */
+@media (max-width: 900px) {
+  .page-header { padding-top: 20px; }
+  main { padding: 14px 16px 30px; }
+  .group-grid { grid-template-columns: 1fr; gap: 14px; }
+  .project-grid { grid-template-columns: 1fr; gap: 14px; }
+  .view-topbar { padding: 16px 16px 0; }
+}
+@media (max-width: 640px) {
+  .toolbar { gap: 8px; }
+  .btn { padding: 9px 18px; font-size: 14px; }
+  .group-grid-inner { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+  .name-card { min-height: 64px; font-size: 16px; }
+  .panel { padding: 20px; border-radius: 14px; }
+  textarea { min-height: 280px; }
+  .modal { padding: 22px 18px 20px; }
+}
+</style>
+</head>
+<body>
+<!-- SECTION: view-home -->
+<div id="view-home" class="view">
+  <div class="view-topbar">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <a class="btn btn-ghost btn-back" href="../index.html">← 班级主页</a>
+      <span class="home-count" id="home-count"></span>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" id="export-all-btn">导出集合报告</button>
+      <button class="btn btn-primary" id="new-project-btn" data-primary-action>＋ 新建项目</button>
+    </div>
+  </div>
+  <header class="page-header">
+    <div class="title-block">
+      <h1>早自习任务打卡</h1>
+      <div class="title-rule"></div>
+      <p class="subtitle">每个科目一个独立项目 · 名单共用，打卡进度各自保存</p>
+    </div>
+  </header>
+  <main>
+    <div class="project-grid" id="project-grid"></div>
+    <div class="empty-state hidden" id="home-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#b7892f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <path d="M9 13h6"></path>
+      </svg>
+      <h2>还没有任何项目</h2>
+      <p>创建第一个科目项目，录入名单后即可开始打卡。<br />支持语文、英语，以及任意自定义科目。</p>
+      <button class="btn btn-primary" id="home-empty-new-btn">创建新项目</button>
+    </div>
+  </main>
+</div>
+
+<!-- SECTION: view-checkin -->
+<div id="view-checkin" class="view hidden">
+  <div class="view-topbar">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <a class="btn btn-ghost btn-back" href="../index.html">← 班级主页</a>
+      <button class="btn btn-ghost btn-back" id="back-home-btn">项目列表</button>
+    </div>
+    <span class="subject-badge" id="checkin-subject-badge">语文</span>
+  </div>
+  <header class="page-header">
+    <div class="title-block">
+      <h1 id="checkin-title">项目</h1>
+      <div class="title-rule"></div>
+      <p class="subtitle" id="today-line">让每一份坚持都被看见</p>
+    </div>
+    <div class="toolbar">
+      <div class="progress-chip">
+        <div class="progress-line">
+          <span>已完成 <b id="done-count">0</b> / <span id="total-count">0</span> 人</span>
+          <span id="progress-pct" style="color: var(--gold); font-weight: 700;">0%</span>
+        </div>
+        <div class="progress-bar"><i id="progress-fill"></i></div>
+      </div>
+      <button class="btn btn-primary" id="export-btn" data-primary-action>下载报告</button>
+      <button class="btn btn-ghost" id="reset-btn">重置打卡</button>
+      <button class="btn btn-ghost" id="checkin-admin-btn">管理名单</button>
+    </div>
+  </header>
+  <main>
+    <div class="group-grid" id="group-grid"></div>
+    <div class="empty-state hidden" id="checkin-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#b7892f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="4" y="3" width="16" height="18" rx="2"></rect>
+        <path d="M8 8h8M8 12h8M8 16h5"></path>
+      </svg>
+      <h2>还没有录入名单</h2>
+      <p>名单为全部项目共用，前往名单管理粘贴学生名单，保存后即可开始打卡。</p>
+      <button class="btn btn-primary" id="goto-admin-btn">前往名单管理</button>
+    </div>
+  </main>
+</div>
+
+<!-- SECTION: view-admin -->
+<div id="view-admin" class="view hidden">
+  <div class="view-topbar">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <a class="btn btn-ghost btn-back" href="../index.html">← 班级主页</a>
+      <button class="btn btn-ghost btn-back" id="admin-back-home-btn">项目列表</button>
+    </div>
+    <span class="subject-badge" id="admin-subject-badge">语文</span>
+  </div>
+  <header class="admin-header">
+    <h1>名单管理</h1>
+    <div class="title-rule"></div>
+    <p>当前项目：<b id="admin-project-name"></b> · 名单为全部项目共用，保存后所有项目立即生效</p>
+  </header>
+  <main>
+    <section class="panel">
+      <div class="editor-label">
+        <span>学生名单</span>
+        <small>一行一个名字 · 以 # 结尾的行是小组标题 · 重复与空行自动过滤</small>
+      </div>
+      <textarea id="name-input" placeholder="例如：&#10;第一组#&#10;张伟&#10;李娜&#10;第二组#&#10;王昌龄&#10;……"></textarea>
+      <div class="actions">
+        <button class="btn btn-primary" id="save-names-btn" data-primary-action>保存名单</button>
+        <button class="btn btn-ghost" id="load-txt-btn">读取 name.txt</button>
+        <button class="btn btn-ghost" id="admin-to-checkin-btn">返回打卡页</button>
+      </div>
+      <div class="status-msg" id="status-msg"></div>
+    </section>
+  </main>
+</div>
+
+<!-- SECTION: footer -->
+<footer class="page-footer">
+  <p>名单为全部项目共用，打卡进度各自保存 · 数据仅保存在当前浏览器本地</p>
+</footer>
+
+<!-- SECTION: praise-overlay -->
+<div id="praise-overlay" data-image="../ext/1858374084.cdn.123clouddisk.com/38379272#" role="alertdialog" aria-label="表扬">
+  <div class="praise-vignette"></div>
+  <div class="praise-rays"></div>
+  <div class="praise-halo"></div>
+  <div class="praise-confetti" id="praise-confetti"></div>
+  <div class="praise-content">
+    <div class="praise-text" id="praise-text"></div>
+  </div>
+  <!-- SECTION: undo-scene -->
+  <div class="undo-scene" id="undo-scene">
+    <div class="undo-text">撤回了【强】【强】【强】</div>
+    <div class="undo-stage">
+      <i class="undo-item ui-1">强</i>
+      <i class="undo-item ui-2">强</i>
+      <i class="undo-item ui-3">强</i>
+      <img class="undo-bin" src="../ext/1858374084.cdn.123clouddisk.com/38139077#" alt="垃圾桶" />
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: create-modal -->
+<div class="modal-overlay hidden" id="create-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="新建项目">
+    <div class="modal-head">
+      <h2>新建项目</h2>
+      <button class="modal-close" id="create-close-x" type="button" aria-label="关闭">✕</button>
+    </div>
+    <div class="field">
+      <label>选择科目标签</label>
+      <div class="tab-bar" id="subject-tabs">
+        <button type="button" class="tab-btn active" data-subject="语文">语文</button>
+        <button type="button" class="tab-btn" data-subject="英语">英语</button>
+        <button type="button" class="tab-btn" data-subject="other">其他</button>
+      </div>
+      <input id="custom-subject-input" class="hidden" type="text" maxlength="10" placeholder="请输入科目名称，如：数学、物理" />
+    </div>
+    <div class="field">
+      <label>项目名称（可选）</label>
+      <input id="project-name-input" type="text" maxlength="20" placeholder="不填则自动命名，如：语文项目 1" />
+    </div>
+    <p class="form-err hidden" id="create-err"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="create-cancel-btn" type="button">取消</button>
+      <button class="btn btn-primary" id="create-confirm-btn" type="button" data-primary-action>创建项目</button>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: export-all-modal -->
+<div class="modal-overlay hidden" id="export-all-modal">
+  <div class="modal export-all-modal" role="dialog" aria-modal="true" aria-label="导出集合报告">
+    <div class="modal-head">
+      <h2>导出集合报告</h2>
+      <button class="modal-close" id="export-all-close-x" type="button" aria-label="关闭">✕</button>
+    </div>
+    <p style="margin-top:10px;font-size:13px;color:var(--ink-soft);">勾选要包含的项目，导出为一份 Excel 文件（含汇总页 + 各项目明细页）。</p>
+    <div class="export-all-toolbar">
+      <a id="export-all-select-all">全选</a>
+      <a id="export-all-select-none">清空</a>
+      <span id="export-all-count">已选 0 项</span>
+    </div>
+    <div class="export-all-list" id="export-all-list"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="export-all-cancel-btn" type="button">取消</button>
+      <button class="btn btn-primary" id="export-all-confirm-btn" type="button" data-primary-action>导出报告</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// SECTION: constants
+var LS_INDEX = 'zzx_mp_projects_v1';
+var LS_DATA_PREFIX = 'zzx_mp_data_';
+var LS_NAMES_GLOBAL = 'zzx_mp_names_global';
+var MIGRATED_FLAG = 'zzx_mp_migrated_v1';
+var LEGACY_NAMES_KEY = 'zzx_checkin_names';
+var LEGACY_DONE_KEY = 'zzx_checkin_done';
+var LEGACY_RECORD_KEY = 'zzx_checkin_records';
+var PRAISE_DURATION = 2000;
+var UNGROUPED_NAME = '全体';
+
+// SECTION: state
+var currentProject = null; // 当前打开的项目元信息
+var currentData = null;    // 当前项目数据 {names, done, records}
+var groups = [];
+var allNames = [];
+var doneMap = {};
+var records = {};
+var praiseTimer = null;
+
+var overlay = document.getElementById('praise-overlay');
+var praiseText = document.getElementById('praise-text');
+var groupGrid = document.getElementById('group-grid');
+var confettiBox = document.getElementById('praise-confetti');
+var undoScene = document.getElementById('undo-scene');
+
+// SECTION: praise-image
+// 用户指定的表扬背景图（硬编码），运行时赋值
+overlay.style.backgroundImage = 'url("' + overlay.getAttribute('data-image') + '")';
+overlay.addEventListener('click', hidePraise);
+
+// SECTION: utils
+function pad2(x) { return String(x).padStart(2, '0'); }
+
+function fmtDateTime(ts) {
+  if (!ts) return '';
+  var d = new Date(ts);
+  return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日 ' +
+    pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+}
+
+function subjectBadgeClass(subject) {
+  if (subject === '语文') return 'sb-yuwen';
+  if (subject === '英语') return 'sb-yingyu';
+  if (subject === '旧版') return 'sb-legacy';
+  return 'sb-other';
+}
+
+function sanitizeFileName(name) {
+  return String(name).replace(/[\\/:*?"<>|\s]+/g, '');
+}
+
+// SECTION: storage
+function loadIndex() {
+  try {
+    var raw = localStorage.getItem(LS_INDEX);
+    if (raw) {
+      var obj = JSON.parse(raw);
+      if (obj && Array.isArray(obj.projects)) { return obj; }
+    }
+  } catch (e) { /* 解析失败按空索引处理 */ }
+  return { projects: [] };
+}
+
+function saveIndex(idx) {
+  try { localStorage.setItem(LS_INDEX, JSON.stringify(idx)); } catch (e) { /* 本地存储不可用时静默降级 */ }
+}
+
+function genId() {
+  return 'p_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function findProject(id) {
+  var idx = loadIndex();
+  for (var i = 0; i < idx.projects.length; i++) {
+    if (idx.projects[i].id === id) { return idx.projects[i]; }
+  }
+  return null;
+}
+
+function touchProject(id) {
+  var idx = loadIndex();
+  idx.projects.forEach(function (p) {
+    if (p.id === id) { p.lastOpenedAt = Date.now(); p.updatedAt = Date.now(); }
+  });
+  saveIndex(idx);
+}
+
+function loadProjectData(id) {
+  try {
+    var raw = localStorage.getItem(LS_DATA_PREFIX + id);
+    if (raw) {
+      var d = JSON.parse(raw);
+      return {
+        names: Array.isArray(d.names) ? d.names : [],
+        done: (d.done && typeof d.done === 'object') ? d.done : {},
+        records: (d.records && typeof d.records === 'object') ? d.records : {}
+      };
+    }
+  } catch (e) { /* 解析失败按空数据处理 */ }
+  return { names: [], done: {}, records: {} };
+}
+
+function saveProjectData(id, data) {
+  // 项目数据只保存打卡状态与记录，名单全局共用
+  try { localStorage.setItem(LS_DATA_PREFIX + id, JSON.stringify({ done: data.done || {}, records: data.records || {} })); } catch (e) { /* 静默降级 */ }
+}
+
+function loadGlobalNames() {
+  try {
+    var raw = localStorage.getItem(LS_NAMES_GLOBAL);
+    if (raw) {
+      var arr = JSON.parse(raw);
+      if (Array.isArray(arr)) {
+        return arr.filter(function (n) { return typeof n === 'string' && n.trim() !== ''; });
+      }
+    }
+  } catch (e) { /* 解析失败按空名单处理 */ }
+  return [];
+}
+
+function saveGlobalNames(list) {
+  try { localStorage.setItem(LS_NAMES_GLOBAL, JSON.stringify(list)); } catch (e) { /* 静默降级 */ }
+}
+
+// 共享名单 → 去重后的全部姓名
+function allSharedNames() {
+  var gs = parseGroups(loadGlobalNames());
+  var names = [];
+  gs.forEach(function (g) {
+    g.members.forEach(function (n) { if (names.indexOf(n) === -1) { names.push(n); } });
+  });
+  return names;
+}
+
+function deleteProjectData(id) {
+  try { localStorage.removeItem(LS_DATA_PREFIX + id); } catch (e) { /* 静默降级 */ }
+}
+
+function saveCurrentData() {
+  if (currentProject) { saveProjectData(currentProject.id, currentData); }
+}
+
+function saveDone() {
+  if (!currentData) { return; }
+  currentData.done = doneMap;
+  saveCurrentData();
+}
+
+function saveRecords() {
+  if (!currentData) { return; }
+  currentData.records = records;
+  saveCurrentData();
+}
+
+// SECTION: migration
+// 首次进入多项目模式时，把旧版单一名单/打卡数据迁移为一个「旧版项目」，原数据保留不删除
+function migrateLegacy() {
+  try {
+    if (localStorage.getItem(MIGRATED_FLAG)) { return; }
+    var raw = localStorage.getItem(LEGACY_NAMES_KEY);
+    var names = null;
+    if (raw) {
+      var arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr.length > 0) {
+        names = arr.filter(function (n) { return typeof n === 'string' && n.trim() !== ''; });
+      }
+    }
+    if (names && names.length > 0) {
+      var done = {};
+      try { done = JSON.parse(localStorage.getItem(LEGACY_DONE_KEY) || '{}') || {}; } catch (e) { done = {}; }
+      var recs = {};
+      try { recs = JSON.parse(localStorage.getItem(LEGACY_RECORD_KEY) || '{}') || {}; } catch (e) { recs = {}; }
+      var doneFiltered = {};
+      var recordsFiltered = {};
+      names.forEach(function (n) {
+        if (done[n]) { doneFiltered[n] = true; }
+        if (recs[n]) { recordsFiltered[n] = recs[n]; }
+      });
+      var now = Date.now();
+      var legacy = {
+        id: genId(),
+        name: '旧版项目',
+        subject: '旧版',
+        createdAt: now,
+        updatedAt: now,
+        lastOpenedAt: null
+      };
+      if (loadGlobalNames().length === 0) { saveGlobalNames(names); }
+      var idx = loadIndex();
+      idx.projects.push(legacy);
+      saveIndex(idx);
+      saveProjectData(legacy.id, { done: doneFiltered, records: recordsFiltered });
+    }
+  } catch (e) { /* 迁移失败不阻塞主流程 */ }
+  try { localStorage.setItem(MIGRATED_FLAG, '1'); } catch (e) { /* 静默降级 */ }
+}
+
+// SECTION: router
+function showView(name) {
+  ['home', 'checkin', 'admin'].forEach(function (v) {
+    document.getElementById('view-' + v).classList.toggle('hidden', v !== name);
+  });
+  window.scrollTo(0, 0);
+}
+
+function parseHash() {
+  var h = location.hash || '#/';
+  var parts = h.replace(/^#\/?/, '').split('/');
+  return { view: parts[0] || 'home', id: parts[1] || null };
+}
+
+function route() {
+  var r = parseHash();
+  if (r.view === 'checkin' && r.id && findProject(r.id)) { openCheckin(r.id); return; }
+  if (r.view === 'admin' && r.id && findProject(r.id)) { openAdmin(r.id); return; }
+  if (r.view !== 'home' && r.view !== '') { location.replace('#/'); return; }
+  openHome();
+}
+
+window.addEventListener('hashchange', route);
+
+// SECTION: parse
+// 名单格式：以「组名#」开头的行是小组标题，其后的行是该组成员；
+// 分组标记之前的名字归入默认组「全体」，兼容无分组的旧名单。
+function parseGroups(list) {
+  var gs = [];
+  var cur = null;
+  var headless = [];
+  list.forEach(function (line) {
+    if (/#$/.test(line)) {
+      var gname = line.replace(/#+$/, '').trim();
+      cur = { name: gname || UNGROUPED_NAME, members: [] };
+      gs.push(cur);
+    } else if (cur) {
+      cur.members.push(line);
+    } else {
+      headless.push(line);
+    }
+  });
+  if (headless.length > 0) {
+    gs.unshift({ name: UNGROUPED_NAME, members: headless });
+  }
+  gs = gs.filter(function (g) { return g.members.length > 0; });
+  if (gs.length === 0 && list.length > 0) {
+    gs.push({ name: UNGROUPED_NAME, members: list.slice() });
+  }
+  return gs;
+}
+
+function normalizeTxt(text) {
+  var seen = {};
+  var out = [];
+  text.split(/\r?\n/).forEach(function (line) {
+    var n = line.trim();
+    // 分组标记行保留；普通名字行去重去空
+    var key = /#$/.test(n) ? n + '::group' : n;
+    if (n && !seen[key]) { seen[key] = true; out.push(n); }
+  });
+  return out;
+}
+
+// SECTION: home-render
+var projectGrid = document.getElementById('project-grid');
+var homeEmpty = document.getElementById('home-empty');
+var homeCount = document.getElementById('home-count');
+
+function renderHome() {
+  var idx = loadIndex();
+  var projects = idx.projects.slice().sort(function (a, b) {
+    return (b.lastOpenedAt || b.createdAt) - (a.lastOpenedAt || a.createdAt);
+  });
+  projectGrid.innerHTML = '';
+  homeCount.textContent = projects.length > 0 ? '共 ' + projects.length + ' 个项目' : '';
+  if (projects.length === 0) {
+    projectGrid.classList.add('hidden');
+    homeEmpty.classList.remove('hidden');
+    return;
+  }
+  projectGrid.classList.remove('hidden');
+  homeEmpty.classList.add('hidden');
+
+  var frag = document.createDocumentFragment();
+  var names = allSharedNames();
+  projects.forEach(function (p) {
+    var data = loadProjectData(p.id);
+    var doneCount = names.reduce(function (acc, n) { return acc + (data.done[n] ? 1 : 0); }, 0);
+    var pct = names.length > 0 ? Math.round(doneCount / names.length * 100) : 0;
+
+    var card = document.createElement('article');
+    card.className = 'project-card';
+
+    // 头部：名称 + 科目标签
+    var head = document.createElement('div');
+    head.className = 'pc-head';
+    var nameEl = document.createElement('span');
+    nameEl.className = 'pc-name';
+    nameEl.textContent = p.name;
+    nameEl.title = '点击进入项目';
+    var badge = document.createElement('span');
+    badge.className = 'subject-badge ' + subjectBadgeClass(p.subject);
+    badge.textContent = p.subject;
+    head.appendChild(nameEl);
+    head.appendChild(badge);
+
+    // 元信息
+    var meta = document.createElement('div');
+    meta.className = 'pc-meta';
+    var created = document.createElement('span');
+    created.textContent = '创建于 ' + fmtDateTime(p.createdAt);
+    meta.appendChild(created);
+    if (p.lastOpenedAt) {
+      var last = document.createElement('span');
+      last.textContent = '最近打开 ' + fmtDateTime(p.lastOpenedAt);
+      meta.appendChild(last);
+    }
+
+    // 进度
+    var prog = document.createElement('div');
+    prog.className = 'pc-progress';
+    var pline = document.createElement('div');
+    pline.className = 'progress-line';
+    var ptext = document.createElement('span');
+    ptext.innerHTML = '已完成 <b>' + doneCount + '</b> / ' + names.length + ' 人';
+    var ppct = document.createElement('span');
+    ppct.style.color = 'var(--gold)';
+    ppct.style.fontWeight = '700';
+    ppct.textContent = names.length > 0 ? pct + '%' : '未录入名单';
+    pline.appendChild(ptext);
+    pline.appendChild(ppct);
+    var pbar = document.createElement('div');
+    pbar.className = 'progress-bar';
+    var pfill = document.createElement('i');
+    pfill.style.width = pct + '%';
+    pbar.appendChild(pfill);
+    prog.appendChild(pline);
+    prog.appendChild(pbar);
+
+    // 操作区
+    var actions = document.createElement('div');
+    actions.className = 'pc-actions';
+    var enterBtn = document.createElement('button');
+    enterBtn.className = 'btn btn-primary';
+    enterBtn.setAttribute('data-primary-action', '');
+    enterBtn.textContent = '进入项目';
+    var renameBtn = document.createElement('button');
+    renameBtn.className = 'btn-text';
+    renameBtn.textContent = '重命名';
+    var delBtn = document.createElement('button');
+    delBtn.className = 'btn-text danger';
+    delBtn.textContent = '删除';
+
+    enterBtn.addEventListener('click', function () { location.hash = '#/checkin/' + p.id; });
+    nameEl.addEventListener('click', function () { location.hash = '#/checkin/' + p.id; });
+    renameBtn.addEventListener('click', function () { renameProject(p); });
+    delBtn.addEventListener('click', function () { deleteProject(p); });
+
+    actions.appendChild(enterBtn);
+    actions.appendChild(renameBtn);
+    actions.appendChild(delBtn);
+
+    card.appendChild(head);
+    card.appendChild(meta);
+    card.appendChild(prog);
+    card.appendChild(actions);
+    frag.appendChild(card);
+  });
+  projectGrid.appendChild(frag);
+}
+
+function openHome() {
+  currentProject = null;
+  currentData = null;
+  showView('home');
+  renderHome();
+}
+
+// SECTION: project-ops
+function defaultProjectName(subject) {
+  var idx = loadIndex();
+  var count = idx.projects.reduce(function (acc, p) { return acc + (p.subject === subject ? 1 : 0); }, 0);
+  return subject + '项目 ' + (count + 1);
+}
+
+function renameProject(p) {
+  var newName = prompt('重命名项目「' + p.name + '」：', p.name);
+  if (newName === null) { return; }
+  newName = newName.trim();
+  if (!newName) { alert('项目名称不能为空。'); return; }
+  var idx = loadIndex();
+  var target = null;
+  idx.projects.forEach(function (x) { if (x.id === p.id) { target = x; } });
+  if (!target) { return; }
+  target.name = newName.slice(0, 20);
+  target.updatedAt = Date.now();
+  saveIndex(idx);
+  renderHome();
+}
+
+function deleteProject(p) {
+  var data = loadProjectData(p.id);
+  var hasNames = Array.isArray(data.names) && data.names.length > 0;
+  var doneCount = Object.keys(data.done).filter(function (k) { return data.done[k]; }).length;
+  var msg = '确定要删除项目「' + p.name + '」吗？';
+  if (hasNames) {
+    msg += '\n该项目包含 ' + data.names.length + ' 人名单' + (doneCount > 0 ? '、' + doneCount + ' 条打卡记录' : '');
+  }
+  msg += '\n删除后数据无法恢复。';
+  if (!confirm(msg)) { return; }
+  var idx = loadIndex();
+  idx.projects = idx.projects.filter(function (x) { return x.id !== p.id; });
+  saveIndex(idx);
+  deleteProjectData(p.id);
+  if (currentProject && currentProject.id === p.id) { currentProject = null; currentData = null; }
+  renderHome();
+}
+
+// SECTION: create-modal
+var createModal = document.getElementById('create-modal');
+var subjectTabs = document.getElementById('subject-tabs');
+var customSubjectInput = document.getElementById('custom-subject-input');
+var projectNameInput = document.getElementById('project-name-input');
+var createErr = document.getElementById('create-err');
+var selectedTab = '语文';
+
+function setCreateError(msg) {
+  if (msg) {
+    createErr.textContent = msg;
+    createErr.classList.remove('hidden');
+  } else {
+    createErr.textContent = '';
+    createErr.classList.add('hidden');
+  }
+}
+
+function selectTab(subject) {
+  selectedTab = subject;
+  var btns = subjectTabs.querySelectorAll('.tab-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle('active', btns[i].getAttribute('data-subject') === subject);
+  }
+  customSubjectInput.classList.toggle('hidden', subject !== 'other');
+  setCreateError('');
+}
+
+function openCreateModal() {
+  selectTab('语文');
+  customSubjectInput.value = '';
+  projectNameInput.value = '';
+  setCreateError('');
+  createModal.classList.remove('hidden');
+  projectNameInput.focus();
+}
+
+function closeCreateModal() {
+  createModal.classList.add('hidden');
+}
+
+subjectTabs.addEventListener('click', function (e) {
+  var btn = e.target.closest('.tab-btn');
+  if (btn) { selectTab(btn.getAttribute('data-subject')); }
+});
+
+document.getElementById('new-project-btn').addEventListener('click', openCreateModal);
+document.getElementById('home-empty-new-btn').addEventListener('click', openCreateModal);
+document.getElementById('create-cancel-btn').addEventListener('click', closeCreateModal);
+document.getElementById('create-close-x').addEventListener('click', closeCreateModal);
+createModal.addEventListener('click', function (e) {
+  if (e.target === createModal) { closeCreateModal(); }
+});
+
+document.getElementById('create-confirm-btn').addEventListener('click', function () {
+  var subject = selectedTab;
+  if (subject === 'other') {
+    subject = customSubjectInput.value.trim();
+    if (!subject) {
+      setCreateError('请填写自定义科目名称。');
+      customSubjectInput.focus();
+      return;
+    }
+    if (subject.length > 10) {
+      setCreateError('科目名称最多 10 个字。');
+      return;
+    }
+    if (subject === '语文' || subject === '英语') {
+      selectTab(subject === '语文' ? '语文' : '英语');
+    }
+  }
+  var name = projectNameInput.value.trim();
+  if (!name) { name = defaultProjectName(subject); }
+  if (name.length > 20) {
+    setCreateError('项目名称最多 20 个字。');
+    return;
+  }
+  var now = Date.now();
+  var project = {
+    id: genId(),
+    name: name,
+    subject: subject,
+    createdAt: now,
+    updatedAt: now,
+    lastOpenedAt: now
+  };
+  var idx = loadIndex();
+  idx.projects.push(project);
+  saveIndex(idx);
+  saveProjectData(project.id, { done: {}, records: {} });
+  closeCreateModal();
+  location.hash = '#/checkin/' + project.id;
+});
+
+// SECTION: checkin-view
+var emptyState = document.getElementById('checkin-empty');
+
+function openCheckin(id) {
+  currentProject = findProject(id);
+  if (!currentProject) { openHome(); return; }
+  touchProject(id);
+  currentData = loadProjectData(id);
+  groups = parseGroups(loadGlobalNames());
+  allNames = [];
+  groups.forEach(function (g) {
+    g.members.forEach(function (n) {
+      if (allNames.indexOf(n) === -1) { allNames.push(n); }
+    });
+  });
+  doneMap = {};
+  records = {};
+  allNames.forEach(function (n) {
+    if (currentData.done[n]) {
+      doneMap[n] = true;
+      if (currentData.records[n]) { records[n] = currentData.records[n]; }
+    }
+  });
+  currentData.done = doneMap;
+  currentData.records = records;
+
+  var now = new Date();
+  document.getElementById('today-line').textContent =
+    now.getFullYear() + ' 年 ' + (now.getMonth() + 1) + ' 月 ' + now.getDate() + ' 日 · 让每一份坚持都被看见';
+  document.getElementById('checkin-title').textContent = currentProject.name;
+  var badge = document.getElementById('checkin-subject-badge');
+  badge.textContent = currentProject.subject;
+  badge.className = 'subject-badge ' + subjectBadgeClass(currentProject.subject);
+
+  if (allNames.length === 0) {
+    groupGrid.classList.add('hidden');
+    emptyState.classList.remove('hidden');
+  } else {
+    emptyState.classList.add('hidden');
+    groupGrid.classList.remove('hidden');
+  }
+  showView('checkin');
+  renderBoard();
+}
+
+// SECTION: render
+function makeBadge() {
+  var b = document.createElement('span');
+  b.className = 'check-badge';
+  b.textContent = '✔';
+  return b;
+}
+
+function renderBoard() {
+  groupGrid.innerHTML = '';
+  var frag = document.createDocumentFragment();
+  groups.forEach(function (g, gi) {
+    var panel = document.createElement('section');
+    panel.className = 'group-panel';
+    panel.dataset.group = gi;
+
+    var head = document.createElement('div');
+    head.className = 'group-header';
+    var nameEl = document.createElement('h2');
+    nameEl.className = 'group-name';
+    nameEl.textContent = g.name;
+    var countEl = document.createElement('span');
+    countEl.className = 'group-count';
+    head.appendChild(nameEl);
+    head.appendChild(countEl);
+
+    var inner = document.createElement('div');
+    inner.className = 'group-grid-inner';
+    g.members.forEach(function (n) {
+      var card = document.createElement('div');
+      card.className = 'name-card' + (doneMap[n] ? ' done' : '');
+      card.setAttribute('role', 'button');
+      card.setAttribute('data-primary-action', '');
+      var label = document.createElement('span');
+      label.textContent = n;
+      card.appendChild(label);
+      if (doneMap[n]) { card.appendChild(makeBadge()); }
+      card.addEventListener('click', function () { onCardClick(n, card); });
+      inner.appendChild(card);
+    });
+
+    panel.appendChild(head);
+    panel.appendChild(inner);
+    frag.appendChild(panel);
+  });
+  groupGrid.appendChild(frag);
+  updateCounter();
+}
+
+function updateCounter() {
+  var doneCount = allNames.reduce(function (acc, n) { return acc + (doneMap[n] ? 1 : 0); }, 0);
+  var pct = allNames.length > 0 ? Math.round(doneCount / allNames.length * 100) : 0;
+  document.getElementById('done-count').textContent = doneCount;
+  document.getElementById('total-count').textContent = allNames.length;
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  var panels = groupGrid.querySelectorAll('.group-panel');
+  groups.forEach(function (g, gi) {
+    var panel = panels[gi];
+    if (!panel) { return; }
+    var dc = g.members.reduce(function (acc, n) { return acc + (doneMap[n] ? 1 : 0); }, 0);
+    panel.querySelector('.group-count').textContent = dc + ' / ' + g.members.length + ' 人';
+    panel.classList.toggle('group-done', dc > 0 && dc === g.members.length);
+  });
+}
+
+// SECTION: checkin
+function onCardClick(name, cardEl) {
+  var firstTime = !doneMap[name];
+  if (firstTime) {
+    doneMap[name] = true;
+    records[name] = { t: Date.now() }; // 记录打卡时间戳，用于顺序与精确时间
+    saveDone();
+    saveRecords();
+    cardEl.classList.add('done');
+    cardEl.appendChild(makeBadge());
+    updateCounter();
+    showPraise(name);
+  } else {
+    doneMap[name] = false;
+    delete records[name]; // 撤回时清掉该生的打卡记录
+    saveDone();
+    saveRecords();
+    renderBoard(); // 重建卡片去掉 done 状态与 ✔ 徽章
+    showUndo();
+  }
+}
+
+var CONFETTI_COLORS = ['#f7c948', '#ffdf8a', '#ffd166', '#fff1c9', '#e8a820', '#ffffff'];
+
+function launchConfetti() {
+  confettiBox.innerHTML = '';
+  var frag = document.createDocumentFragment();
+  for (var i = 0; i < 36; i++) {
+    var p = document.createElement('i');
+    p.className = 'confetti-piece';
+    var size = 6 + Math.random() * 8;
+    p.style.left = (Math.random() * 100) + '%';
+    p.style.width = size + 'px';
+    p.style.height = (size * (0.5 + Math.random() * 1.1)) + 'px';
+    p.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+    p.style.setProperty('--sway', ((Math.random() * 140) - 70) + 'px');
+    p.style.animationDuration = (1.2 + Math.random() * 0.9) + 's';
+    p.style.animationDelay = (Math.random() * 0.35) + 's';
+    frag.appendChild(p);
+  }
+  confettiBox.appendChild(frag);
+}
+
+function showPraise(name) {
+  if (praiseTimer) { clearTimeout(praiseTimer); praiseTimer = null; }
+  overlay.classList.remove('mode-undo');
+  undoScene.classList.remove('play');
+  praiseText.textContent = '优秀的' + name + '【强】【强】【强】';
+  overlay.classList.remove('show');
+  void overlay.offsetWidth; // 重置动画
+  launchConfetti();
+  overlay.classList.add('show');
+  praiseTimer = setTimeout(hidePraise, PRAISE_DURATION);
+}
+
+function showUndo() {
+  if (praiseTimer) { clearTimeout(praiseTimer); praiseTimer = null; }
+  confettiBox.innerHTML = '';
+  overlay.classList.add('mode-undo');
+  overlay.classList.remove('show');
+  void overlay.offsetWidth; // 重置动画
+  overlay.classList.add('show');
+  undoScene.classList.add('play'); // 触发「强」字飞入垃圾桶动画
+  praiseTimer = setTimeout(hidePraise, PRAISE_DURATION);
+}
+
+function hidePraise() {
+  if (praiseTimer) { clearTimeout(praiseTimer); praiseTimer = null; }
+  overlay.classList.remove('show');
+  overlay.classList.remove('mode-undo');
+  undoScene.classList.remove('play');
+  confettiBox.innerHTML = '';
+}
+
+// SECTION: device-ip
+var deviceIP = null;
+function fetchDeviceIP() {
+  return fetch('https://api.ipify.org?format=json')
+    .then(function (r) { if (!r.ok) { throw new Error('HTTP ' + r.status); } return r.json(); })
+    .then(function (d) { deviceIP = d.ip; return deviceIP; })
+    .catch(function () {
+      return fetch('https://api.ip.sb/ip')
+        .then(function (r) { if (!r.ok) { throw new Error('HTTP ' + r.status); } return r.text(); })
+        .then(function (t) { deviceIP = t.trim(); return deviceIP; })
+        .catch(function () { deviceIP = null; return null; });
+    });
+}
+fetchDeviceIP(); // 页面加载时预取设备出口 IP，导出时可直接使用
+
+// SECTION: export
+document.getElementById('export-btn').addEventListener('click', async function () {
+  if (!currentProject) { return; }
+  if (allNames.length === 0) {
+    alert('还没有录入名单，请先在名单管理中更新名单（名单为全部项目共用）。');
+    return;
+  }
+  if (typeof XLSX === 'undefined') {
+    alert('导出组件尚未加载成功，请检查网络后刷新页面重试。');
+    return;
+  }
+  if (!deviceIP) { await Promise.race([fetchDeviceIP(), new Promise(function (r) { setTimeout(function () { r(null); }, 3000); })]); }
+  var d = new Date();
+  var dateLabel = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+  // 完成顺序：按打卡时间戳升序排名
+  var orderList = allNames
+    .filter(function (n) { return doneMap[n] && records[n]; })
+    .sort(function (a, b) { return records[a].t - records[b].t; });
+  var orderMap = {};
+  orderList.forEach(function (n, i) { orderMap[n] = i + 1; });
+  var formatTime = function (ts) {
+    var dt = new Date(ts);
+    return (dt.getMonth() + 1) + '月' + dt.getDate() + '日 ' +
+      pad2(dt.getHours()) + ':' + pad2(dt.getMinutes()) + ':' + pad2(dt.getSeconds());
+  };
+  var rows = [
+    ['项目：' + currentProject.name + '（' + currentProject.subject + '） · 打卡时间：' + dateLabel + ' · 设备IP：' + (deviceIP || '未能获取')],
+    ['小组', '姓名', '是否完成', '完成顺序', '完成时间']
+  ];
+  groups.forEach(function (g) {
+    g.members.forEach(function (n) {
+      var done = !!doneMap[n];
+      rows.push([
+        g.name,
+        n,
+        done ? '✔' : '',
+        done ? orderMap[n] : '',
+        done && records[n] ? formatTime(records[n].t) : ''
+      ]);
+    });
+  });
+  var ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }];
+  ws['!cols'] = [{ wch: 24 }, { wch: 16 }, { wch: 12 }, { wch: 12 }, { wch: 22 }];
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '打卡报告');
+  XLSX.writeFile(wb, '早自习打卡报告_' + sanitizeFileName(currentProject.name) + '_' +
+    d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + '.xlsx');
+});
+
+// SECTION: export-all —— 集合报告：汇总 sheet + 各项目明细 sheet
+var exportAllModal = document.getElementById('export-all-modal');
+var exportAllList = document.getElementById('export-all-list');
+var exportAllCount = document.getElementById('export-all-count');
+
+function openExportAllModal() {
+  var idx = loadIndex();
+  var projects = idx.projects.slice().sort(function (a, b) {
+    return (b.lastOpenedAt || b.createdAt) - (a.lastOpenedAt || a.createdAt);
+  });
+  if (projects.length === 0) {
+    alert('还没有任何项目，无法导出集合报告。');
+    return;
+  }
+  if (allSharedNames().length === 0) {
+    alert('还没有录入名单，请先在名单管理中更新名单。');
+    return;
+  }
+  if (typeof XLSX === 'undefined') {
+    alert('导出组件尚未加载成功，请检查网络后刷新页面重试。');
+    return;
+  }
+  var names = allSharedNames();
+  exportAllList.innerHTML = '';
+  var frag = document.createDocumentFragment();
+  projects.forEach(function (p) {
+    var data = loadProjectData(p.id);
+    var doneCnt = names.reduce(function (acc, n) { return acc + (data.done[n] ? 1 : 0); }, 0);
+    var label = document.createElement('label');
+    label.className = 'export-all-item';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = p.id;
+    cb.checked = true;
+    var nameSpan = document.createElement('span');
+    nameSpan.className = 'eai-name';
+    nameSpan.textContent = p.name + '（' + p.subject + '）';
+    var metaSpan = document.createElement('span');
+    metaSpan.className = 'eai-meta';
+    metaSpan.textContent = doneCnt + '/' + names.length + ' 已完成';
+    label.appendChild(cb);
+    label.appendChild(nameSpan);
+    label.appendChild(metaSpan);
+    frag.appendChild(label);
+  });
+  exportAllList.appendChild(frag);
+  updateExportAllCount();
+  exportAllModal.classList.remove('hidden');
+}
+
+function closeExportAllModal() {
+  exportAllModal.classList.add('hidden');
+}
+
+function updateExportAllCount() {
+  var cbs = exportAllList.querySelectorAll('input[type="checkbox"]');
+  var cnt = 0;
+  for (var i = 0; i < cbs.length; i++) { if (cbs[i].checked) { cnt++; } }
+  exportAllCount.textContent = '已选 ' + cnt + ' 项';
+}
+
+exportAllList.addEventListener('change', function (e) {
+  if (e.target.type === 'checkbox') { updateExportAllCount(); }
+});
+
+document.getElementById('export-all-btn').addEventListener('click', openExportAllModal);
+document.getElementById('export-all-cancel-btn').addEventListener('click', closeExportAllModal);
+document.getElementById('export-all-close-x').addEventListener('click', closeExportAllModal);
+exportAllModal.addEventListener('click', function (e) {
+  if (e.target === exportAllModal) { closeExportAllModal(); }
+});
+
+document.getElementById('export-all-select-all').addEventListener('click', function () {
+  var cbs = exportAllList.querySelectorAll('input[type="checkbox"]');
+  for (var i = 0; i < cbs.length; i++) { cbs[i].checked = true; }
+  updateExportAllCount();
+});
+document.getElementById('export-all-select-none').addEventListener('click', function () {
+  var cbs = exportAllList.querySelectorAll('input[type="checkbox"]');
+  for (var i = 0; i < cbs.length; i++) { cbs[i].checked = false; }
+  updateExportAllCount();
+});
+
+document.getElementById('export-all-confirm-btn').addEventListener('click', async function () {
+  try {
+  var cbs = exportAllList.querySelectorAll('input[type="checkbox"]:checked');
+  if (cbs.length === 0) {
+    alert('请至少勾选一个项目。');
+    return;
+  }
+  if (!deviceIP) { await Promise.race([fetchDeviceIP(), new Promise(function (r) { setTimeout(function () { r(null); }, 3000); })]); }
+  var selectedIds = [];
+  for (var i = 0; i < cbs.length; i++) { selectedIds.push(cbs[i].value); }
+  var idx = loadIndex();
+  var selectedProjects = selectedIds.map(function (id) { return findProject(id); }).filter(Boolean);
+  var names = allSharedNames();
+  var gs = parseGroups(loadGlobalNames());
+  var d = new Date();
+  var dateLabel = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+
+  // 汇总 sheet：小组 | 姓名 | 项目1(科目) | 项目2(科目) | ... | 完成数/总数
+  var summaryTitle = '集合报告 · ' + dateLabel + ' · 设备IP：' + (deviceIP || '未能获取') + ' · 共 ' + selectedProjects.length + ' 个项目';
+  var summaryHeader = ['小组', '姓名'];
+  selectedProjects.forEach(function (p) {
+    summaryHeader.push(p.name + '(' + p.subject + ')');
+  });
+  summaryHeader.push('完成数/' + selectedProjects.length);
+  var summaryRows = [[summaryTitle], summaryHeader];
+
+  // 为每个学生计算各项目完成情况
+  var projectDataMap = {};
+  selectedProjects.forEach(function (p) {
+    projectDataMap[p.id] = loadProjectData(p.id);
+  });
+
+  gs.forEach(function (g) {
+    g.members.forEach(function (n) {
+      var row = [g.name, n];
+      var doneCount = 0;
+      selectedProjects.forEach(function (p) {
+        var data = projectDataMap[p.id];
+        var done = !!(data.done && data.done[n]);
+        if (done) { doneCount++; }
+        row.push(done ? '✔' : '');
+      });
+      row.push(doneCount + '/' + selectedProjects.length);
+      summaryRows.push(row);
+    });
+  });
+
+  var wb = XLSX.utils.book_new();
+  var wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+  var summaryCols = summaryHeader.length;
+  wsSummary['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: summaryCols - 1 } }];
+  var summaryColWidths = [{ wch: 24 }, { wch: 16 }];
+  for (var ci = 0; ci < selectedProjects.length; ci++) { summaryColWidths.push({ wch: 18 }); }
+  summaryColWidths.push({ wch: 12 });
+  wsSummary['!cols'] = summaryColWidths;
+  XLSX.utils.book_append_sheet(wb, wsSummary, '汇总');
+
+  // 各项目明细 sheet（与单项目导出格式完全一致）
+  var formatTimeFn = function (ts) {
+    var dt = new Date(ts);
+    return (dt.getMonth() + 1) + '月' + dt.getDate() + '日 ' +
+      pad2(dt.getHours()) + ':' + pad2(dt.getMinutes()) + ':' + pad2(dt.getSeconds());
+  };
+
+  selectedProjects.forEach(function (p) {
+    var data = projectDataMap[p.id];
+    var pDone = data.done || {};
+    var pRecords = data.records || {};
+    var orderList = names
+      .filter(function (n) { return pDone[n] && pRecords[n]; })
+      .sort(function (a, b) { return pRecords[a].t - pRecords[b].t; });
+    var orderMap = {};
+    orderList.forEach(function (n, i) { orderMap[n] = i + 1; });
+
+    var detailRows = [
+      ['项目：' + p.name + '（' + p.subject + '） · 打卡时间：' + dateLabel + ' · 设备IP：' + (deviceIP || '未能获取')],
+      ['小组', '姓名', '是否完成', '完成顺序', '完成时间']
+    ];
+    gs.forEach(function (g) {
+      g.members.forEach(function (n) {
+        var done = !!pDone[n];
+        detailRows.push([
+          g.name,
+          n,
+          done ? '✔' : '',
+          done ? orderMap[n] : '',
+          done && pRecords[n] ? formatTimeFn(pRecords[n].t) : ''
+        ]);
+      });
+    });
+    var wsDetail = XLSX.utils.aoa_to_sheet(detailRows);
+    wsDetail['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }];
+    wsDetail['!cols'] = [{ wch: 24 }, { wch: 16 }, { wch: 12 }, { wch: 12 }, { wch: 22 }];
+    // sheet 名截断至 31 字符（Excel 限制）
+    var sheetName = sanitizeFileName(p.name).slice(0, 28) || '项目';
+    // 防重名
+    var baseName = sheetName;
+    var suffix = 1;
+    while (wb.SheetNames.indexOf(sheetName) !== -1) {
+      suffix++;
+      sheetName = baseName + '_' + suffix;
+    }
+    XLSX.utils.book_append_sheet(wb, wsDetail, sheetName);
+  });
+
+  closeExportAllModal();
+  XLSX.writeFile(wb, '早自习打卡集合报告_' +
+    d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + '.xlsx');
+  } catch (err) {
+    console.error('集合导出失败：', err);
+    alert('导出失败：' + (err && err.message ? err.message : err) + '\n请刷新页面后重试。');
+    closeExportAllModal();
+  }
+});
+
+// SECTION: reset
+document.getElementById('reset-btn').addEventListener('click', function () {
+  if (allNames.length === 0) { return; }
+  if (!confirm('确定要重置本项目的打卡状态吗？所有学生的完成标记将被清除。')) { return; }
+  doneMap = {};
+  records = {};
+  saveDone();
+  saveRecords();
+  renderBoard();
+});
+
+// SECTION: admin-view
+var nameInput = document.getElementById('name-input');
+var statusMsg = document.getElementById('status-msg');
+
+function showAdminStatus(type, text) {
+  statusMsg.className = 'status-msg ' + type;
+  statusMsg.textContent = text;
+}
+
+function openAdmin(id) {
+  currentProject = findProject(id);
+  if (!currentProject) { openHome(); return; }
+  touchProject(id);
+  currentData = loadProjectData(id);
+  document.getElementById('admin-project-name').textContent = currentProject.name;
+  var badge = document.getElementById('admin-subject-badge');
+  badge.textContent = currentProject.subject;
+  badge.className = 'subject-badge ' + subjectBadgeClass(currentProject.subject);
+  nameInput.value = loadGlobalNames().join('\n');
+  statusMsg.className = 'status-msg';
+  statusMsg.textContent = '';
+  showView('admin');
+}
+
+document.getElementById('save-names-btn').addEventListener('click', function () {
+  if (!currentProject || !currentData) { return; }
+  var list = normalizeTxt(nameInput.value);
+  if (list.length === 0) {
+    showAdminStatus('err', '名单为空：请至少输入一个名字，一行一个。');
+    return;
+  }
+  saveGlobalNames(list);
+  // 清理所有项目中已不在名单内的人的打卡状态与记录
+  var valid = {};
+  list.forEach(function (n) { valid[n] = true; });
+  var idx = loadIndex();
+  idx.projects.forEach(function (p) {
+    var d = loadProjectData(p.id);
+    var newDone = {};
+    var newRecords = {};
+    Object.keys(d.done).forEach(function (n) {
+      if (valid[n] && d.done[n]) { newDone[n] = true; }
+    });
+    Object.keys(d.records).forEach(function (n) {
+      if (valid[n] && newDone[n]) { newRecords[n] = d.records[n]; }
+    });
+    saveProjectData(p.id, { done: newDone, records: newRecords });
+  });
+  showAdminStatus('ok', '名单保存成功（共 ' + list.length + ' 人），所有项目共用这份名单。');
+});
+
+document.getElementById('load-txt-btn').addEventListener('click', async function () {
+  try {
+    var res = await fetch('name.txt', { cache: 'no-cache' });
+    if (!res.ok) { throw new Error('HTTP ' + res.status); }
+    var text = await res.text();
+    var list = normalizeTxt(text);
+    if (list.length === 0) { throw new Error('name.txt 为空'); }
+    nameInput.value = list.join('\n');
+    showAdminStatus('ok', '已读取 name.txt，共 ' + list.length + ' 行，点击「保存名单」生效。');
+  } catch (e) {
+    showAdminStatus('err', '未能读取同目录下的 name.txt：请确认文件存在，并通过本地服务器（如 python -m http.server）打开本页面后重试。');
+  }
+});
+
+// SECTION: navigation-bindings
+document.getElementById('back-home-btn').addEventListener('click', function () { location.hash = '#/'; });
+document.getElementById('admin-back-home-btn').addEventListener('click', function () { location.hash = '#/'; });
+document.getElementById('checkin-admin-btn').addEventListener('click', function () {
+  if (currentProject) { location.hash = '#/admin/' + currentProject.id; }
+});
+document.getElementById('goto-admin-btn').addEventListener('click', function () {
+  if (currentProject) { location.hash = '#/admin/' + currentProject.id; }
+});
+document.getElementById('admin-to-checkin-btn').addEventListener('click', function () {
+  if (currentProject) { location.hash = '#/checkin/' + currentProject.id; }
+});
+
+// SECTION: init
+// 兼容：全局名单为空而旧项目数据里存有名单时，提升为全局名单，并清掉各项目内的名单字段
+function ensureGlobalNames() {
+  if (loadGlobalNames().length === 0) {
+    var idx0 = loadIndex();
+    for (var i = 0; i < idx0.projects.length; i++) {
+      var d = loadProjectData(idx0.projects[i].id);
+      if (d.names.length > 0) { saveGlobalNames(d.names); break; }
+    }
+  }
+  // 逐个重写项目数据，只保留打卡状态与记录
+  var idx = loadIndex();
+  idx.projects.forEach(function (p) {
+    var pd = loadProjectData(p.id);
+    saveProjectData(p.id, { done: pd.done, records: pd.records });
+  });
+}
+
+migrateLegacy();
+ensureGlobalNames();
+if (!location.hash) { location.replace('#/'); }
+route();
+</script>
+<script type="module" src="../ext/static.cloudflareinsights.com/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"14c5f7de53ca40a9aaaf4550cdf47b2e","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

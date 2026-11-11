@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- SECTION: site-icon -->
+<link rel="icon" type="image/jpeg" href="ext/1858374084.cdn.123clouddisk.com/38273346#" />
+<title>班级 Tools</title>
+<style>
+/* SECTION: font-face 得意黑（Smiley Sans） */
+@font-face {
+  font-family: 'SmileySans';
+  src: url('ext/1858374084.cdn.123clouddisk.com/38138536#') format('truetype');
+  font-display: swap;
+  font-weight: 400 900;
+}
+
+/* SECTION: base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #f6f4ef;
+  --ink: #1c2430;
+  --ink-soft: #5c6673;
+  --gold: #b7892f;
+  --gold-soft: rgba(183, 137, 47, 0.14);
+  --card: #ffffff;
+  --line: #e8e3d8;
+  --done-a: #1f4d3a;
+}
+html, body { min-height: 100%; }
+body {
+  font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Source Han Sans SC", sans-serif;
+  background:
+    radial-gradient(1100px 520px at 85% -10%, rgba(183, 137, 47, 0.09), transparent 60%),
+    radial-gradient(900px 480px at -10% 0%, rgba(28, 36, 48, 0.06), transparent 55%),
+    var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+}
+body::before { /* 顶部金线，品牌感装饰 */
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 500;
+  background: linear-gradient(90deg, transparent, #d4a94e 22%, #f0d795 50%, #d4a94e 78%, transparent);
+}
+
+/* SECTION: header */
+.page-header {
+  max-width: 1720px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 46px 3.2vw 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.site-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff;
+  padding: 3px;
+  border: 2px solid rgba(183, 137, 47, 0.5);
+  box-shadow: 0 8px 22px rgba(20, 24, 32, 0.16);
+}
+.title-block { text-align: center; }
+.title-block h1 {
+  font-family: 'SmileySans', "Noto Serif SC", "Source Han Serif SC", "STZhongsong", "SimSun", serif;
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+}
+.title-rule {
+  width: 76px;
+  height: 3px;
+  margin: 12px auto 8px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.subtitle { color: var(--ink-soft); font-size: 15px; letter-spacing: 0.08em; }
+
+/* SECTION: layout */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 30px 3.2vw 40px;
+}
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* SECTION: tool-card */
+.tool-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 24px 22px;
+  text-decoration: none;
+  color: var(--ink);
+  box-shadow: 0 2px 6px rgba(20, 24, 32, 0.04), 0 10px 26px rgba(20, 24, 32, 0.05);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.tool-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(183, 137, 47, 0.5);
+  box-shadow: 0 16px 34px rgba(20, 24, 32, 0.12);
+}
+.tool-card svg { width: 40px; height: 40px; stroke: var(--gold); flex: none; }
+.tool-card h2 {
+  font-family: 'SmileySans', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tool-card p {
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.85;
+  flex: 1;
+}
+.tool-path {
+  align-self: flex-start;
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: 13px;
+  color: var(--gold);
+  background: var(--gold-soft);
+  border-radius: 8px;
+  padding: 4px 10px;
+  letter-spacing: 0.03em;
+}
+.tool-enter {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.tool-card:hover .tool-enter { color: var(--gold); transform: translateX(4px); }
+.tool-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-gold { background: var(--gold-soft); color: var(--gold); border: 1px solid rgba(183, 137, 47, 0.3); }
+.badge-green { background: rgba(47, 110, 81, 0.1); color: var(--done-a); border: 1px solid rgba(47, 110, 81, 0.28); }
+.badge-gray { background: rgba(92, 102, 115, 0.12); color: var(--ink-soft); border: 1px solid rgba(92, 102, 115, 0.3); }
+.tool-soon { opacity: 0.72; filter: grayscale(0.45); }
+.tool-soon .tool-enter { color: var(--ink-soft); }
+
+/* SECTION: footer */
+.page-footer {
+  text-align: center;
+  padding: 14px 20px 28px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+/* SECTION: responsive */
+@media (max-width: 640px) {
+  .page-header { padding-top: 34px; }
+  main { padding: 22px 16px 30px; }
+  .tool-grid { grid-template-columns: 1fr; gap: 16px; }
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <img class="site-logo" src="ext/1858374084.cdn.123clouddisk.com/38273346#" alt="班级 Tools" />
+  <div class="title-block">
+    <h1>班级 Tools</h1>
+    <div class="title-rule"></div>
+    <p class="subtitle">班级工具箱 · 每一个工具都是一个独立路径 · 纯静态页面，数据仅保存在本地</p>
+  </div>
+</header>
+
+<main>
+  <div class="tool-grid">
+
+    <!-- 随机点名 -->
+    <a class="tool-card" href="chou/">
+      <span class="tool-badge badge-gold">随机</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="16 3 21 3 21 8"></polyline>
+        <line x1="4" y1="20" x2="21" y2="3"></line>
+        <polyline points="21 16 21 21 16 21"></polyline>
+        <line x1="15" y1="15" x2="21" y2="21"></line>
+        <line x1="4" y1="4" x2="9" y2="9"></line>
+      </svg>
+      <h2>随机点名</h2>
+      <p>个人 / 小组双模式抽签，洗牌算法保证公平，按下按钮 0.5 秒名字滚动后大字体揭晓结果，最近 10 条抽取记录本地留存。</p>
+      <span class="tool-path">/chou/</span>
+      <span class="tool-enter">进入工具 →</span>
+    </a>
+
+    <!-- 打卡记录 -->
+    <a class="tool-card" href="daka/">
+      <span class="tool-badge badge-green">打卡</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 11l3 3L22 4"></path>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+      </svg>
+      <h2>打卡记录</h2>
+      <p>早自习任务打卡，多科目项目独立管理，名单全局共用、打卡进度各自保存，支持一键导出 Excel 打卡报告。</p>
+      <span class="tool-path">/daka/</span>
+      <span class="tool-enter">进入工具 →</span>
+    </a>
+
+    <!-- 班级颁奖 -->
+    <a class="tool-card" href="prize/">
+      <span class="tool-badge badge-gold">颁奖</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="8" r="6"></circle>
+        <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+      </svg>
+      <h2>班级颁奖</h2>
+      <p>全屏合影背景字，班级的微光、榜样的力量，配上班名与颁奖名称，一键生成颁奖仪式背景。</p>
+      <span class="tool-path">/prize/</span>
+      <span class="tool-enter">进入工具 →</span>
+    </a>
+
+    <!-- 小组分队 -->
+    <a class="tool-card" href="zudui/">
+      <span class="tool-badge badge-gold">分队</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M7 8H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2"></path>
+        <path d="M17 8h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2"></path>
+        <circle cx="8" cy="12" r="3"></circle>
+        <circle cx="16" cy="12" r="3"></circle>
+      </svg>
+      <h2>小组分队</h2>
+      <p>活动抽签两组一队，同人数优先配对、6人组不与8人组配对，队序随机，辩论赛对抗赛一键分队。</p>
+      <span class="tool-path">/zudui/</span>
+      <span class="tool-enter">进入工具 →</span>
+    </a>
+
+    <!-- 班级 Wiki -->
+    <a class="tool-card" href="wiki/">
+      <span class="tool-badge badge-gold">Wiki</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+      </svg>
+      <h2>班级 Wiki</h2>
+      <p>班级知识库，部署教程、使用说明与资料沉淀之地，文章源自同目录文本，开箱即用。</p>
+      <span class="tool-path">/wiki/</span>
+      <span class="tool-enter">进入 Wiki →</span>
+    </a>
+
+  </div>
+</main>
+
+<footer class="page-footer">
+  <p>班级 Tools · Copyright © 2026 城北中学. All Rights Reserved 本工具独立于717班，仅个人公益授权</p>
+</footer>
+
+<script type="module" src="ext/static.cloudflareinsights.com/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"14c5f7de53ca40a9aaaf4550cdf47b2e","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>
